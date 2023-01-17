@@ -1,0 +1,376 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Zdrojové soubory">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Hlavičkové soubory">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Soubory zdrojů">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Hlavičkové soubory\Models">
+      <UniqueIdentifier>{489d758f-eb4b-404b-a8ec-bc84d260a5ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Fragments">
+      <UniqueIdentifier>{ebf7da78-995d-4c09-b42c-498963ddf510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model">
+      <UniqueIdentifier>{b107d424-e5cd-4f97-9cde-83a7762b15dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\house">
+      <UniqueIdentifier>{f51c9367-6d78-4bf5-93b1-da6b5cdead62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\plain">
+      <UniqueIdentifier>{d386bad8-40a6-4416-80cd-0fdb2f3c3b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\skydome">
+      <UniqueIdentifier>{38a39cae-e2a3-4da7-b36c-7558b43ecd4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\terrain">
+      <UniqueIdentifier>{1edfed1f-6975-4be6-9d91-1919d357294b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\tree">
+      <UniqueIdentifier>{a3d7e13f-5076-4763-8c68-5448dece27ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\zombie">
+      <UniqueIdentifier>{9517ca3e-c674-4aaa-bde0-27f6fb8ddf6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Model\skybox">
+      <UniqueIdentifier>{1f3aae0c-5088-45fc-af13-e6af90d229a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Textures">
+      <UniqueIdentifier>{95ab385d-7480-4fad-897e-70296fc1067e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Soubory zdrojů\Vertexes">
+      <UniqueIdentifier>{2b8567c2-e2b5-426d-bc9a-208a52e33ba2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Zdrojové soubory\Models">
+      <UniqueIdentifier>{d8133f50-e010-416c-a8a7-c341b9e8dd04}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Bushes.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Gift.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Plain.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="SuziFlat.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="SuziSmooth.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Tree.cpp">
+      <Filter>Zdrojové soubory\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Callbacks.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObject.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Models.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelsLoader.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveBezier.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveCircle.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveLine.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementCalculator.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Observer.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderInstances.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderLoader.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+    <ClCompile Include="Transformation.cpp">
+      <Filter>Zdrojové soubory</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bushes.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Gift.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Plain.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="SuziFlat.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="SuziSmooth.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.hpp">
+      <Filter>Hlavičkové soubory\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Callbacks.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObject.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Models.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelsLoader.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveBezier.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveCircle.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveLine.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementCalculator.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Observer.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderInstances.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderLoader.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Transformation.hpp">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\building.h">
+      <Filter>Soubory zdrojů\Model\house</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\plain.h">
+      <Filter>Soubory zdrojů\Model\plain</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\skycube.h">
+      <Filter>Soubory zdrojů\Model\skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\skydome.h">
+      <Filter>Soubory zdrojů\Model\skydome</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\bushes.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\gift.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\sphere.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\suzi_flat.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\suzi_smooth.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\tree.h">
+      <Filter>Soubory zdrojů\Model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Default.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Phong.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Phong_no_textures.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Phong_norm.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Skybox.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Terrain.frag">
+      <Filter>Soubory zdrojů\Fragments</Filter>
+    </None>
+    <None Include="Models\model.mtl">
+      <Filter>Soubory zdrojů\Model\house</Filter>
+    </None>
+    <None Include="Models\untitled.blend">
+      <Filter>Soubory zdrojů\Model\house</Filter>
+    </None>
+    <None Include="Models\plane.mtl">
+      <Filter>Soubory zdrojů\Model\plain</Filter>
+    </None>
+    <None Include="Models\skydome.blend">
+      <Filter>Soubory zdrojů\Model\skydome</Filter>
+    </None>
+    <None Include="Models\skydome.mtl">
+      <Filter>Soubory zdrojů\Model\skydome</Filter>
+    </None>
+    <None Include="Models\teren.mtl">
+      <Filter>Soubory zdrojů\Model\terrain</Filter>
+    </None>
+    <None Include="Models\tree.mtl">
+      <Filter>Soubory zdrojů\Model\tree</Filter>
+    </None>
+    <None Include="Models\zombie.mtl">
+      <Filter>Soubory zdrojů\Model\zombie</Filter>
+    </None>
+    <None Include="Default.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+    <None Include="Light.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+    <None Include="Light_no_textures.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+    <None Include="Normal_map.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+    <None Include="Skybox.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+    <None Include="Terrain.vert">
+      <Filter>Soubory zdrojů\Vertexes</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Textures\box_albedo.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\box_normal.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\fulldome3.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\grass.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\house.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\skydome.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\sphere_albedo.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\sphere_normal.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\tree.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\wooden_fence.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\zombie.png">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\negx.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\negy.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\negz.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\posx.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\posy.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+    <Image Include="Textures\nightskybox\posz.jpg">
+      <Filter>Soubory zdrojů\Textures</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
