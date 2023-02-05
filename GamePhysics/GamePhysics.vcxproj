@@ -104,14 +104,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glm-master;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glm-master;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\freeglut-3.4.0\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\source\physxextensions\src;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\pxshared\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\source\foundation\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\lib\Release\x64;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\lib;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\lib\x64\v141\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;glew32.lib;SOIL64.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\lib\Release\x64;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\lib;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\lib\x64\v141\Debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\bin\win.x86_64.vc142.md\debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\snippets\Graphics\lib\win64\glut;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;glew32.lib;SOIL64.lib;assimp-vc140-mt.lib;PhysXExtensions_static_64.lib;PhysX_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCooking_64.lib;PhysXCommon_64.lib;SnippetUtils_static_64.lib;SnippetRender_static_64.lib;PhysXFoundation_64.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -202,6 +203,7 @@
     <ClInclude Include="Tree.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="Default.frag" />
     <None Include="Default.vert" />
     <None Include="Light.vert" />

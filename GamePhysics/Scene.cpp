@@ -12,7 +12,7 @@
 #include "MoveLine.hpp"
 #include "MoveBezier.hpp"
 
-#define draw_objects 150
+#define draw_objects 10
 
 void Scene::Loop()
 {
@@ -37,6 +37,9 @@ void Scene::Loop()
 	applyLights();
 
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
+		//physx part
+		stepPhysics(true);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // clear color and depth buffer
 		
 		skybox->Draw();
@@ -48,15 +51,23 @@ void Scene::Loop()
 		ambientLight.apply();
 		applyLights();
 
-		this->drawable_object[3].Pos_mov(glm::vec3(2.f, 2.f, 6.f));
-		this->drawable_object[3].rotate(0.01f, glm::vec3(1.f, 0.f, 0.f));
-		this->drawable_object[3].Pos_mov(glm::vec3(-2.f, -2.f, -6.f));
+		//physx part
+		
+		physx::PxScene* scene;
+		PxGetPhysics().getScenes(&scene, 1);
+		physx::PxU32 nbActors = scene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC);
+		if (nbActors)
+		{
+			std::vector<physx::PxRigidActor*> actors(nbActors);
+			scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
+		}
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
 			this->drawable_object[i].updateObject(delta);
 			lastTime = now;
 		}
+		//initPhysics(true);
 
 		camera->update(delta);
 		lights[1]->update(camera->direction(), camera->position());
@@ -185,96 +196,126 @@ void Scene::onButtonPress(const MouseData& mouseData) {
 	}
 }
 
+physx::PxRigidDynamic* Scene::createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
+{
+	physx::PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
+	dynamic->setAngularDamping(0.5f);
+	dynamic->setLinearVelocity(velocity);
+	gScene->addActor(*dynamic);
+	return dynamic;
+}
+
+void Scene::createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent)
+{
+	physx::PxShape* shape = gPhysics->createShape(physx::PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
+	for (physx::PxU32 i = 0; i < size; i++)
+	{
+		for (physx::PxU32 j = 0; j < size - i; j++)
+		{
+			physx::PxTransform localTm(physx::PxVec3(physx::PxReal(j * 2) - physx::PxReal(size - i), physx::PxReal(i * 2 + 1), 0) * halfExtent);
+			physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(t.transform(localTm));
+			body->attachShape(*shape);
+			physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+			gScene->addActor(*body);
+		}
+	}
+	shape->release();
+}
+
+void Scene::initPhysics(bool interactive)
+{
+	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+
+	gPvd = PxCreatePvd(*gFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate(NULL, 5425, 10);
+	gPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, physx::PxTolerancesScale(), true, gPvd);
+
+	physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	gDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+	gScene = gPhysics->createScene(sceneDesc);
+
+	physx::PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	if (pvdClient)
+	{
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+
+	physx::PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 0), *gMaterial);
+	gScene->addActor(*groundPlane);
+
+	for (physx::PxU32 i = 0; i < 5; i++)
+		createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
+
+	if (!interactive)
+		createDynamic(physx::PxTransform(physx::PxVec3(0, 40, 100)), physx::PxSphereGeometry(10), physx::PxVec3(0, -50, -100));
+}
+
+void Scene::stepPhysics(bool)
+{
+	gScene->simulate(1.0f / 60.0f);
+	gScene->fetchResults(true);
+}
+
+void Scene::cleanupPhysics(bool)
+{
+	gScene->release();
+	gDispatcher->release();
+	gPhysics->release();
+	if (gPvd)
+	{
+		physx::PxPvdTransport* transport = gPvd->getTransport();
+		gPvd->release();	gPvd = NULL;
+		transport->release();
+	}
+	gFoundation->release();
+
+	printf("SnippetHelloWorld done.\n");
+}
+
+void Scene::keyPress(unsigned char key, const physx::PxTransform& camera)
+{
+	switch (toupper(key))
+	{
+	case 'B':	createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f); break;
+	case ' ':	createDynamic(camera, physx::PxSphereGeometry(3.0f), camera.rotate(physx::PxVec3(0, 0, -1)) * 200);	break;
+	}
+}
+
 
 Scene::Scene(GLFWwindow* in_window)
 {
 	this->window = in_window;
 
 	static std::vector<std::string> cubemapTextures{
-		/*"Textures/cubemap/posx.jpg",
+		"Textures/cubemap/posx.jpg",
 		"Textures/cubemap/negx.jpg",
 		"Textures/cubemap/posy.jpg",
 		"Textures/cubemap/negy.jpg",
 		"Textures/cubemap/posz.jpg",
-		"Textures/cubemap/negz.jpg"*/
-		"Textures/nightskybox/posx.jpg",
-		"Textures/nightskybox/negx.jpg",
-		"Textures/nightskybox/posy.jpg",
-		"Textures/nightskybox/negy.jpg",
-		"Textures/nightskybox/posz.jpg",
-		"Textures/nightskybox/negz.jpg"
+		"Textures/cubemap/negz.jpg"
 	};
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("teren"), ShaderInstances::phong(), TextureManager::getOrEmplace("teren", "Textures/grass.png"), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
-	this->drawable_object.emplace_back(DrawableObject(new SuziFlat(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(20, 2.f, -5));
-	this->drawable_object.emplace_back(DrawableObject(new SuziFlat(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(2, 2.f, 8));
-	this->drawable_object.emplace_back(DrawableObject(new SuziSmooth(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(-15.f, 0.f, 6.f));
-	this->drawable_object.emplace_back(DrawableObject(new SuziSmooth(), ShaderInstances::phong_no_textures(), std::make_shared<MovementCalculator>(
-		std::make_shared<MoveBezier>(
-			glm::vec3{ 40.f, 10.f, 25.f },
-			glm::vec3{ -40.f, 10.f, 25.f },
-			glm::vec3{ -40.f, 10.f, -25.f },
-			glm::vec3{ 40.f, 10.f, -25.f }),
-		glm::vec3{ 0.0, 0.0, 0.0 },
-		10.f
-		), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(4, 2.f, 2));
-	this->drawable_object.emplace_back(DrawableObject(new Gift(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(4, 0.f, 2));
-	/*this->drawable_object.emplace_back(DrawableObject(new Sphere(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-	this->drawable_object.back().Pos_mov(glm::vec3(-5, 2.f, 10));*/
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::phong_norm(), TextureManager::getOrEmplace("sphere", "Textures/sphere_albedo.png", "Textures/sphere_normal.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(-5, 2.f, 10));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("model"), ShaderInstances::phong(), TextureManager::getOrEmplace("house", "Textures/house.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(-15, 0.f, 10));
-	this->drawable_object.back().rotate(45, glm::vec3(0.0f, 1.f, 0.f));
-	this->drawable_object.emplace_back(new Sphere(), ShaderInstances::constant(), std::make_shared<MovementCalculator>(
-		std::make_shared<MoveCircle>(
-			glm::vec3{ 0.f, 30.f, 0.f },
-			40.f),
-		glm::vec3{ 30.0, 30.0, 0.0 },
-		20.f), drawable_object.size());
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("zombie"), ShaderInstances::phong(), TextureManager::getOrEmplace("zombie", "Textures/zombie.png"), std::make_shared<MovementCalculator>(
-		std::make_shared<MoveCircle>(
-			glm::vec3{ 0.f, 2.f, 0.f },
-			8.f),
-		glm::vec3{ 0.0, 3.0, 0.0 },
-		20.f), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(5, 0.0f, 15));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(25, 0.1f, 5));
+	this->drawable_object.back().rotate(90.0f, glm::vec3(0, 1, 0));
 
-	for (int i = 10; i < draw_objects; i++) {
-		if (i % 2 == 0) {
-			this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
-			float x = ((float)rand() / (float)(RAND_MAX)) * 50;
-			float z = ((float)rand() / (float)(RAND_MAX)) * 50;
-			this->drawable_object.back().Pos_mov(glm::vec3(x, 0.f, z));
-			this->drawable_object.back().Pos_scale(0.3);
-		}
-		else if (i % 3 == 0)
-		{
-			this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("zombie"), ShaderInstances::phong(), TextureManager::getOrEmplace("zombie", "Textures/zombie.png"), drawable_object.size(), true));
-			float x = ((float)rand() / (float)(RAND_MAX)) * 50;
-			float z = ((float)rand() / (float)(RAND_MAX)) * 50;
-			float degree = ((float)rand() / (float)(RAND_MAX)) * 50;
-			this->drawable_object.back().Pos_mov(glm::vec3(x, 0.f, z));
-			this->drawable_object.back().rotate(degree, glm::vec3(0.0f, 1.f, 0.f));
-		}
-		else {
-			this->drawable_object.emplace_back(DrawableObject(new Bushes(), ShaderInstances::phong_no_textures(), drawable_object.size()));
-			float x = ((float)rand() / (float)(RAND_MAX)) * 50;
-			float z = ((float)rand() / (float)(RAND_MAX)) * 50;
-			this->drawable_object.back().Pos_mov(glm::vec3(x, 0.f, z));
-			this->drawable_object.back().Pos_scale(3);
-		}
-	}
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("box"), ShaderInstances::phong_norm(), TextureManager::getOrEmplace("box", "Textures/box_albedo.png", "Textures/box_normal.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(-1, 2.f, 10));
-
+	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
 	camera->registerObserver(ShaderInstances::phong());
@@ -283,8 +324,8 @@ Scene::Scene(GLFWwindow* in_window)
 	camera->registerObserver(ShaderInstances::phong_norm());
 	camera->registerObserver(ShaderInstances::skybox());
 
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ -10.f, 50.f, 50.f }, gl::Light::Directional); //SUN OR MOON
-	emplaceLight(glm::vec3{ 0.f, 1.f,1.f }, glm::vec3{ -1.f, 2.f, 5.f }, -glm::vec3{ 40.f, 8.f, 0.f }, 9); // FLASHLIGHT (spotlight) - position is set in while loop
+	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, -50.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 0.f, 1.f,1.f }, glm::vec3{ -1.f, 2.f, 5.f }, -glm::vec3{ 40.f, 8.f, 0.f }, 0); // FLASHLIGHT (spotlight) - position is set in while loop, zero at end is turned off
 	emplaceAmbientLight(glm::vec3{ .1f });
 
 	mouse.instance().registerObserver(*camera);
@@ -295,7 +336,14 @@ Scene::Scene(GLFWwindow* in_window)
 
 void Scene::Run()
 {
+	static const physx::PxU32 frameCount = 100;
+	initPhysics(false);
+	//for (physx::PxU32 i = 0; i < frameCount; i++)
+	//	stepPhysics(false);
+	//cleanupPhysics(false);
+	
 	Loop();
+	cleanupPhysics(true);
 }
 
 void Scene::notify(EventType eventType, void* object) {

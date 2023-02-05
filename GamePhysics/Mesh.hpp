@@ -36,12 +36,12 @@ class Mesh
     std::vector<uint32_t> indices;
     std::shared_ptr<Texture> texture;
 
-    const Material& material;
-
     void init();
 public:
     Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const Material& material);
     Mesh(Mesh&& mesh) noexcept;
+
+    const Material& material;
 
     void bindAndDraw(unsigned int id, Shader* shader) const;
 };

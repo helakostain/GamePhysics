@@ -127,7 +127,7 @@ void main ()
 
         // obtain normal from normal map in range [0,1]
         vec3 normal = texture(normalUnitID, fs_in.TexCoords).rgb;
-        normal = 2.0 * normal - 1.0;
+        normal = 2.0f * normal - 1.0f;
         normal = normalize(normal * vec3(1,1,1));
         normal = normalize(fs_in.TBN * normal);
 

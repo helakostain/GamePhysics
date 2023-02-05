@@ -1,5 +1,6 @@
-#include "Transformation.hpp"
+#define _USE_MATH_DEFINES
 #include <cmath>
+#include "Transformation.hpp"
 #include <glm/ext/matrix_transform.hpp>
 
 float Transformation::capV(float current, float max)
@@ -27,7 +28,8 @@ float Transformation::getAcc(Direction dir)
 
 void Transformation::rotate(float degree, const glm::vec3 axis)
 {
-	transform = glm::rotate(transform, degree, axis);
+	float rad = degree * M_PI / 180;
+	transform = glm::rotate(transform, rad, axis);
 }
 
 void Transformation::setPosition(glm::vec3 position)

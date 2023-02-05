@@ -4,6 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <vector>
+#include <ctype.h>
 #include "DrawableObject.hpp"
 #include "Camera.hpp"
 #include "Shader.hpp"
@@ -12,6 +13,7 @@
 #include "Light.hpp"
 #include "Skybox.hpp"
 #include "Texture.hpp"
+#include "PxPhysicsAPI.h"
 #include <GLFW/glfw3.h> // DO NOT MOVE UP!!!!!!
 
 class Scene : public Observer
@@ -40,6 +42,28 @@ private:
 	void setShaderCount() const;
 
 	void onButtonPress(const MouseData& mouseData);
+
+	//PhysX
+	physx::PxDefaultAllocator gAllocator;
+	physx::PxDefaultErrorCallback gErrorCallback;
+
+	physx::PxFoundation* gFoundation = NULL;
+	physx::PxPhysics* gPhysics = NULL;
+
+	physx::PxDefaultCpuDispatcher* gDispatcher = NULL;
+	physx::PxScene* gScene = NULL;
+
+	physx::PxMaterial* gMaterial = NULL;
+
+	physx::PxPvd* gPvd = NULL;
+
+	physx::PxReal stackZ = 10.0f;
+	physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
+	void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
+	void initPhysics(bool interactive);
+	void stepPhysics(bool /*interactive*/);
+	void cleanupPhysics(bool /*interactive*/);
+	void keyPress(unsigned char key, const physx::PxTransform& camera);
 public:
 	Scene(GLFWwindow* window);
 

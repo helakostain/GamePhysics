@@ -31,8 +31,6 @@ private:
 	void passUniformLocation(const char* var, const glm::mat4& matrix) const;
 	void passUniformLocation(const std::string& var, const glm::mat3& matrix) const;
 	void passUniformLocation(const char* var, const glm::mat3& matrix) const;
-	void passUniformLocation(const std::string& var, const glm::vec3& vector) const;
-	void passUniformLocation(const char* var, const glm::vec3& vector) const;
 	void passUniformLocation(const std::string& var, int32_t value) const;
 	void passUniformLocation(const std::string& var, const float value) const;
 
@@ -63,4 +61,6 @@ public:
 
 	void passUniformLocation(const char* var, int32_t value) const;
 	void passUniformLocation(const char* var, const float value) const;
+	void passUniformLocation(const std::string& var, const glm::vec3& vector) const;
+	void passUniformLocation(const char* var, const glm::vec3& vector) const;
 };

@@ -319,6 +319,7 @@
     <None Include="Terrain.vert">
       <Filter>Soubory zdrojů\Vertexes</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\box_albedo.png">

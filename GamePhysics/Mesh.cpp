@@ -6,6 +6,11 @@ void Mesh::bindAndDraw(const unsigned int id, Shader* shader) const
         texture->bind(shader);
     }
 
+    shader->passUniformLocation("material.diffuse", material.diffuse);
+    shader->passUniformLocation("material.specular", material.specular);
+    shader->passUniformLocation("material.ambient", material.ambient);
+    shader->passUniformLocation("material.shininess", material.shininess);
+
     glStencilFunc(GL_ALWAYS, id, 0xFF);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
