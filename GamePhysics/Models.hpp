@@ -52,4 +52,5 @@ public:
 	// 3D models
 	void addMesh(Mesh&& mesh);
 	void draw(uint32_t id, Shader* shader) const;
+	int get_size_points();
 };

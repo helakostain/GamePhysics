@@ -60,6 +60,7 @@ void Scene::Loop()
 		{
 			std::vector<physx::PxRigidActor*> actors(nbActors);
 			scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
+			applyPhysXTransform();
 		}
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
@@ -251,11 +252,19 @@ void Scene::initPhysics(bool interactive)
 	physx::PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
 
-	for (physx::PxU32 i = 0; i < 5; i++)
-		createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
+	//for (physx::PxU32 i = 0; i < 5; i++)
+	//	createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
 
-	if (!interactive)
-		createDynamic(physx::PxTransform(physx::PxVec3(0, 40, 100)), physx::PxSphereGeometry(10), physx::PxVec3(0, -50, -100));
+	for (int i = 0; i < drawable_object.front().getModel()->meshes.size(); i++)
+	{
+		if (!toPhysxActor(i))
+		{
+			printf("Failed to pass all models to actors!");
+		}
+	}
+
+	//if (!interactive)
+	//	createDynamic(physx::PxTransform(physx::PxVec3(0, 40, 100)), physx::PxSphereGeometry(10), physx::PxVec3(0, -50, -100));
 }
 
 void Scene::stepPhysics(bool)
@@ -289,6 +298,75 @@ void Scene::keyPress(unsigned char key, const physx::PxTransform& camera)
 	}
 }
 
+bool Scene::toPhysxActor(int i)
+{
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = drawable_object.front().getModel()->meshes[i].vertices.size();
+	meshDesc.points.stride = sizeof(Vertex);
+	meshDesc.points.data = &drawable_object.front().getModel()->meshes[i].vertices[0];
+	meshDesc.triangles.count = drawable_object.front().getModel()->meshes[i].indices.size();
+	meshDesc.triangles.stride = 3 * sizeof(uint32_t);
+	meshDesc.triangles.data = &drawable_object.front().getModel()->meshes[i].indices[0];
+
+	physx::PxDefaultMemoryOutputStream writeBuffer;
+	physx::PxTriangleMeshCookingResult::Enum result;
+	physx::PxCookingParams cookingParams = physx::PxCookingParams(physx::PxTolerancesScale());
+	cookingParams.meshWeldTolerance = 0.1f;
+	cookingParams.meshPreprocessParams = physx::PxMeshPreprocessingFlag::eWELD_VERTICES;
+	mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, cookingParams);
+	gScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 2);
+	if (!mCooking)
+		printf("PxCreateCooking failed!");
+	if (mCooking->validateTriangleMesh(meshDesc))
+	{
+		bool status = mCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
+		if (!status)
+			printf("cooking failed!\n");
+			return false;
+	}
+	else
+	{
+		printf("Validation of cooking failed!\n");
+		return false;
+	}
+	
+
+	physx::PxDefaultMemoryInputData readBuffer(writeBuffer.getData(),
+		writeBuffer.getSize());
+	physx::PxTriangleMesh* triangleMesh =
+		gPhysics->createTriangleMesh(readBuffer);
+
+	physx::PxRigidDynamic* dynamicObject = gPhysics->createRigidDynamic(physx::PxTransform(physx::PxVec3(0.0f)));
+	if (!dynamicObject)
+		return false;
+	dynamicObject->setMass(10.0f);
+	dynamicObject->setRigidBodyFlag(
+		physx::PxRigidBodyFlag::eKINEMATIC, true);
+
+	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(
+		*dynamicObject,
+		physx::PxTriangleMeshGeometry(triangleMesh,
+			physx::PxMeshScale()),
+		*gMaterial
+	);
+
+	physx::PxTransform localTm( physx::PxTransform(drawable_object.back().currPosition.x, drawable_object.back().currPosition.y, drawable_object.back().currPosition.z));
+	physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(localTm);
+	body->attachShape(*shape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+	gScene->addActor(*body);
+
+	if (!shape)
+		return false;
+	else
+		shape->release();
+		return true;
+}
+
+void Scene::applyPhysXTransform()
+{
+}
+
 
 Scene::Scene(GLFWwindow* in_window)
 {
@@ -305,8 +383,13 @@ Scene::Scene(GLFWwindow* in_window)
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	/*
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
@@ -314,7 +397,7 @@ Scene::Scene(GLFWwindow* in_window)
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(25, 0.1f, 5));
 	this->drawable_object.back().rotate(90.0f, glm::vec3(0, 1, 0));
-
+	*/
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());

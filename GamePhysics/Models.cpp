@@ -71,3 +71,8 @@ void Models::draw(uint32_t id, Shader* shader) const
 		mesh.bindAndDraw(id, shader);
 	}
 }
+
+int Models::get_size_points()
+{
+	return this->size_points;
+}

@@ -57,6 +57,8 @@ private:
 
 	physx::PxPvd* gPvd = NULL;
 
+	physx::PxCooking* mCooking = NULL;
+
 	physx::PxReal stackZ = 10.0f;
 	physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
 	void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
@@ -64,6 +66,9 @@ private:
 	void stepPhysics(bool /*interactive*/);
 	void cleanupPhysics(bool /*interactive*/);
 	void keyPress(unsigned char key, const physx::PxTransform& camera);
+	
+	bool toPhysxActor(int i);
+	void applyPhysXTransform();
 public:
 	Scene(GLFWwindow* window);
 

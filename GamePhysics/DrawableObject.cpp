@@ -12,6 +12,7 @@ DrawableObject::DrawableObject(Models* model, const char* vertex_path, const cha
     this->transformations = new Transformation();
     this->isObject = false;
     this->id = size;
+    this->size_points = model->get_size_points();
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, int size)
@@ -23,6 +24,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, int size)
     this->texture = nullptr;
     this->isObject = false;
     this->id = size;
+    this->size_points = model->get_size_points();
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<MovementCalculator> movement, int size)
@@ -35,6 +37,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Movemen
     this->isObject = false;
     this->id = size;
     this->movementCalculator = movement;
+    this->size_points = model->get_size_points();
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size)
@@ -46,6 +49,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->texture = texture;
     this->isObject = false;
     this->id = size;
+    this->size_points = model->get_size_points();
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object)
@@ -56,6 +60,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->texture = texture;
     this->isObject = object;
     this->id = size;
+    this->size_points = model->get_size_points();
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, shared_ptr<MovementCalculator> movement, int size, bool object)
@@ -67,6 +72,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->texture = texture;
     this->isObject = object;
     this->id = size;
+    this->size_points = model->get_size_points();
 }
 
 void DrawableObject::DoTransformations(const double delta)
@@ -110,6 +116,7 @@ void DrawableObject::setGrow(Growth g)
 
 void DrawableObject::Pos_mov(glm::vec3 a)
 {
+    this->currPosition = a;
     this->transformations->translate(a);
 }
 
@@ -167,6 +174,21 @@ void DrawableObject::updateMovement(double delta)
 int DrawableObject::getId()
 {
     return id;
+}
+
+int DrawableObject::getSizePoints()
+{
+    return this->size_points;
+}
+
+Models* DrawableObject::getModel()
+{
+    return this->models;
+}
+
+Transformation* DrawableObject::getTransformation()
+{
+    return this->transformations;
 }
 
 Shader& DrawableObject::getShader()

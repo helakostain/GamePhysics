@@ -32,8 +32,7 @@ class Mesh
     GLuint vao = 0;
     GLuint ebo = 0;
 
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    
     std::shared_ptr<Texture> texture;
 
     void init();
@@ -41,6 +40,8 @@ public:
     Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const Material& material);
     Mesh(Mesh&& mesh) noexcept;
 
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
     const Material& material;
 
     void bindAndDraw(unsigned int id, Shader* shader) const;

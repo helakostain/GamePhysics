@@ -21,6 +21,7 @@ private:
 
 	bool isObject;
 	int id;
+	int size_points;
 public:
 	DrawableObject();
 	DrawableObject(Models* model, const char* vertex_path, const char* fragment_path, int size);
@@ -45,6 +46,10 @@ public:
 	void rotate(float degree, glm::vec3 axis);
 	void updateMovement(double delta);
 	int getId();
+	int getSizePoints();
+	Models* getModel();
+	Transformation* getTransformation();
+	glm::vec3 currPosition = { 0,0,0 };
 
 	Shader& getShader();
 };
