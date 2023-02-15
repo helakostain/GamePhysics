@@ -14,6 +14,7 @@
 #include "Skybox.hpp"
 #include "Texture.hpp"
 #include "PxPhysicsAPI.h"
+#include "PsTime.h"
 #include <GLFW/glfw3.h> // DO NOT MOVE UP!!!!!!
 
 class Scene : public Observer
@@ -49,6 +50,7 @@ private:
 
 	physx::PxFoundation* gFoundation = NULL;
 	physx::PxPhysics* gPhysics = NULL;
+	physx::PxCooking* gCooking = NULL;
 
 	physx::PxDefaultCpuDispatcher* gDispatcher = NULL;
 	physx::PxScene* gScene = NULL;
@@ -57,14 +59,19 @@ private:
 
 	physx::PxPvd* gPvd = NULL;
 
-	physx::PxCooking* mCooking = NULL;
-
 	physx::PxReal stackZ = 10.0f;
+	
 	physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
 	void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
-	void initPhysics(bool interactive);
-	void stepPhysics(bool /*interactive*/);
-	void cleanupPhysics(bool /*interactive*/);
+
+	void initPhysics();
+	void createTriangleMeshes(int i);
+	void createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices,
+		bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf);
+	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
+
+	void stepPhysics();
+	void cleanupPhysics();
 	void keyPress(unsigned char key, const physx::PxTransform& camera);
 	
 	bool toPhysxActor(int i);

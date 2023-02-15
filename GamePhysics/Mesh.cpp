@@ -53,9 +53,19 @@ void Mesh::init() {
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const Material& material) :
     vertices(std::move(vertices)), indices(std::move(indices)), material(material)
 {
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        gVertices.push_back(physx::PxVec3(vertices[i].position.x, vertices[i].position.y, vertices[i].position.z));
+    }
     init();
 }
 
 Mesh::Mesh(Mesh&& mesh) noexcept :
     vertices(std::move(mesh.vertices)), indices(std::move(mesh.indices)),
-    vbo(mesh.vbo), vao(mesh.vao), ebo(mesh.ebo), material(mesh.material) { }
+    vbo(mesh.vbo), vao(mesh.vao), ebo(mesh.ebo), material(mesh.material) 
+{
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        gVertices.push_back(physx::PxVec3(vertices[i].position.x, vertices[i].position.y, vertices[i].position.z));
+    }
+}

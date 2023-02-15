@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 
+#include "PxPhysicsAPI.h"
 #include "Texture.hpp"
 #include "Shader.hpp"
 
@@ -41,6 +42,7 @@ public:
     Mesh(Mesh&& mesh) noexcept;
 
     std::vector<Vertex> vertices;
+    std::vector<physx::PxVec3> gVertices;
     std::vector<uint32_t> indices;
     const Material& material;
 

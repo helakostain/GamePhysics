@@ -38,7 +38,7 @@ void Scene::Loop()
 
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
 		//physx part
-		stepPhysics(true);
+		stepPhysics();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // clear color and depth buffer
 		
@@ -223,7 +223,7 @@ void Scene::createStack(const physx::PxTransform& t, physx::PxU32 size, physx::P
 	shape->release();
 }
 
-void Scene::initPhysics(bool interactive)
+void Scene::initPhysics()
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
@@ -232,6 +232,7 @@ void Scene::initPhysics(bool interactive)
 	gPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
 
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, physx::PxTolerancesScale(), true, gPvd);
+	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, physx::PxCookingParams(physx::PxTolerancesScale()));
 
 	physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
@@ -252,32 +253,224 @@ void Scene::initPhysics(bool interactive)
 	physx::PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
 
+	for (int i = 0; i < drawable_object.front().getModel()->meshes.size(); i++)
+	{
+		createTriangleMeshes(i);
+	}
+
 	//for (physx::PxU32 i = 0; i < 5; i++)
 	//	createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
-
+	/*
 	for (int i = 0; i < drawable_object.front().getModel()->meshes.size(); i++)
 	{
 		if (!toPhysxActor(i))
 		{
 			printf("Failed to pass all models to actors!");
 		}
-	}
+	}*/
 
 	//if (!interactive)
 	//	createDynamic(physx::PxTransform(physx::PxVec3(0, 40, 100)), physx::PxSphereGeometry(10), physx::PxVec3(0, -50, -100));
 }
 
-void Scene::stepPhysics(bool)
+void Scene::createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices, bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf)
+{
+	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
+
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = numVertices;
+	meshDesc.points.data = vertices;
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.triangles.count = numTriangles;
+	meshDesc.triangles.data = indices;
+	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+
+	physx::PxCookingParams params = gCooking->getParams();
+
+	// Create BVH34 midphase
+	params.midphaseDesc = physx::PxMeshMidPhase::eBVH34;
+
+	// setup common cooking params
+	setupCommonCookingParams(params, skipMeshCleanup, skipEdgeData);
+
+	// Cooking mesh with less triangles per leaf produces larger meshes with better runtime performance
+	// and worse cooking performance. Cooking time is better when more triangles per leaf are used.
+	params.midphaseDesc.mBVH34Desc.numPrimsPerLeaf = numTrisPerLeaf;
+
+	gCooking->setParams(params);
+
+#if defined(PX_CHECKED) || defined(PX_DEBUG)
+	// If DISABLE_CLEAN_MESH is set, the mesh is not cleaned during the cooking. 
+	// We should check the validity of provided triangles in debug/checked builds though.
+	if (skipMeshCleanup)
+	{
+		PX_ASSERT(gCooking->validateTriangleMesh(meshDesc));
+	}
+#endif // DEBUG
+
+
+	physx::PxTriangleMesh* triMesh = NULL;
+	physx::PxU32 meshSize = 0;
+
+	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
+	if (false)
+	{
+		triMesh = gCooking->createTriangleMesh(meshDesc, gPhysics->getPhysicsInsertionCallback());
+	}
+	else
+	{
+		physx::PxDefaultMemoryOutputStream outBuffer;
+		gCooking->cookTriangleMesh(meshDesc, outBuffer);
+
+		physx::PxDefaultMemoryInputData stream(outBuffer.getData(), outBuffer.getSize());
+		triMesh = gPhysics->createTriangleMesh(stream);
+
+		meshSize = outBuffer.getSize();
+	}
+
+	// Print the elapsed time for comparison
+	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
+	printf("\t -----------------------------------------------\n");
+	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
+	inserted ? printf("\t\t Mesh inserted on\n") : printf("\t\t Mesh inserted off\n");
+	!skipEdgeData ? printf("\t\t Precompute edge data on\n") : printf("\t\t Precompute edge data off\n");
+	!skipMeshCleanup ? printf("\t\t Mesh cleanup on\n") : printf("\t\t Mesh cleanup off\n");
+	printf("\t\t Num triangles per leaf: %d \n", numTrisPerLeaf);
+	printf("\t Elapsed time in ms: %f \n", double(elapsedTime));
+	if (!inserted)
+	{
+		printf("\t Mesh size: %d \n", meshSize);
+	}
+
+	triMesh->release();
+}
+
+void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData)
+{
+	// we suppress the triangle mesh remap table computation to gain some speed, as we will not need it 
+	// in this snippet
+	params.suppressTriangleMeshRemapTable = true;
+
+	// If DISABLE_CLEAN_MESH is set, the mesh is not cleaned during the cooking. The input mesh must be valid. 
+	// The following conditions are true for a valid triangle mesh :
+	//  1. There are no duplicate vertices(within specified vertexWeldTolerance.See PxCookingParams::meshWeldTolerance)
+	//  2. There are no large triangles(within specified PxTolerancesScale.)
+	// It is recommended to run a separate validation check in debug/checked builds, see below.
+
+	if (!skipMeshCleanup)
+		params.meshPreprocessParams &= ~static_cast<physx::PxMeshPreprocessingFlags>(physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH);
+	else
+		params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+
+	// If DISABLE_ACTIVE_EDGES_PREDOCOMPUTE is set, the cooking does not compute the active (convex) edges, and instead 
+	// marks all edges as active. This makes cooking faster but can slow down contact generation. This flag may change 
+	// the collision behavior, as all edges of the triangle mesh will now be considered active.
+	if (!skipEdgeData)
+		params.meshPreprocessParams &= ~static_cast<physx::PxMeshPreprocessingFlags>(physx::PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE);
+	else
+		params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+}
+
+void Scene::createTriangleMeshes(int i)
+{
+	printf("-----------------------------------------------\n");
+	printf("Create triangles mesh using BVH34 midphase: \n\n");
+	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
+	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
+	// runtime performance of simulation and queries. We still need to ensure the triangles 
+	// are valid, so we perform a validation check in debug/checked builds.
+	physx::PxU32 numVertices = drawable_object.front().getModel()->meshes[i].vertices.size();
+	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
+	const physx::PxVec3* vertices = drawable_object.front().getModel()->meshes[i].gVertices.data();
+	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
+	physx::PxU32 numTriangles = drawable_object.front().getModel()->meshes[i].indices.size();
+	const physx::PxU32* indices = drawable_object.front().getModel()->meshes[i].indices.data();
+	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
+	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
+
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = numVertices;
+	meshDesc.points.data = vertices;
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.triangles.count = numTriangles;
+	meshDesc.triangles.data = indices;
+	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+
+	physx::PxCookingParams params = gCooking->getParams();
+
+	// Create BVH34 midphase
+	params.midphaseDesc = physx::PxMeshMidPhase::eBVH34;
+
+	// setup common cooking params
+	setupCommonCookingParams(params, true, false);
+
+	// Cooking mesh with less triangles per leaf produces larger meshes with better runtime performance
+	// and worse cooking performance. Cooking time is better when more triangles per leaf are used.
+	params.midphaseDesc.mBVH34Desc.numPrimsPerLeaf = 15;
+
+	gCooking->setParams(params);
+
+#if defined(PX_CHECKED) || defined(PX_DEBUG)
+	// If DISABLE_CLEAN_MESH is set, the mesh is not cleaned during the cooking. 
+	// We should check the validity of provided triangles in debug/checked builds though.
+	if (true)
+	{
+		PX_ASSERT(gCooking->validateTriangleMesh(meshDesc));
+	}
+#endif // DEBUG
+
+
+	physx::PxTriangleMesh* triMesh = NULL;
+	physx::PxU32 meshSize = 0;
+	bool insertion = false;
+	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
+	if (insertion)
+	{
+		triMesh = gCooking->createTriangleMesh(meshDesc, gPhysics->getPhysicsInsertionCallback());
+	}
+	else
+	{
+		physx::PxDefaultMemoryOutputStream outBuffer;
+		gCooking->cookTriangleMesh(meshDesc, outBuffer);
+
+		physx::PxDefaultMemoryInputData stream(outBuffer.getData(), outBuffer.getSize());
+		triMesh = gPhysics->createTriangleMesh(stream);
+
+		meshSize = outBuffer.getSize();
+	}
+
+	// Print the elapsed time for comparison
+	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
+	printf("\t -----------------------------------------------\n");
+	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
+	true ? printf("\t\t Mesh inserted on\n") : printf("\t\t Mesh inserted off\n");
+	!false ? printf("\t\t Precompute edge data on\n") : printf("\t\t Precompute edge data off\n");
+	!true ? printf("\t\t Mesh cleanup on\n") : printf("\t\t Mesh cleanup off\n");
+	printf("\t\t Num triangles per leaf: %d \n", 15);
+	printf("\t Elapsed time in ms: %f \n", double(elapsedTime));
+	if (!true)
+	{
+		printf("\t Mesh size: %d \n", meshSize);
+	}
+
+	triMesh->release();
+	//delete[] vertices;
+}
+
+void Scene::stepPhysics()
 {
 	gScene->simulate(1.0f / 60.0f);
 	gScene->fetchResults(true);
 }
 
-void Scene::cleanupPhysics(bool)
+void Scene::cleanupPhysics()
 {
 	gScene->release();
 	gDispatcher->release();
 	gPhysics->release();
+	gCooking->release();
 	if (gPvd)
 	{
 		physx::PxPvdTransport* transport = gPvd->getTransport();
@@ -286,7 +479,7 @@ void Scene::cleanupPhysics(bool)
 	}
 	gFoundation->release();
 
-	printf("SnippetHelloWorld done.\n");
+	printf("PhysX done.\n");
 }
 
 void Scene::keyPress(unsigned char key, const physx::PxTransform& camera)
@@ -310,16 +503,15 @@ bool Scene::toPhysxActor(int i)
 
 	physx::PxDefaultMemoryOutputStream writeBuffer;
 	physx::PxTriangleMeshCookingResult::Enum result;
-	physx::PxCookingParams cookingParams = physx::PxCookingParams(physx::PxTolerancesScale());
-	cookingParams.meshWeldTolerance = 0.1f;
-	cookingParams.meshPreprocessParams = physx::PxMeshPreprocessingFlag::eWELD_VERTICES;
-	mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, cookingParams);
+	//physx::PxCookingParams cookingParams = physx::PxCookingParams(physx::PxTolerancesScale());
+	//cookingParams.meshWeldTolerance = 0.1f;
+	//cookingParams.meshPreprocessParams = physx::PxMeshPreprocessingFlag::eWELD_VERTICES;
 	gScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 2);
-	if (!mCooking)
+	if (!gCooking)
 		printf("PxCreateCooking failed!");
-	if (mCooking->validateTriangleMesh(meshDesc))
+	if (gCooking->validateTriangleMesh(meshDesc))
 	{
-		bool status = mCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
+		bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
 		if (!status)
 			printf("cooking failed!\n");
 			return false;
@@ -385,12 +577,12 @@ Scene::Scene(GLFWwindow* in_window)
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground", "Textures/white_tex.png"), drawable_object.size(), true));
 	//this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
+	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
-	/*
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
+	/*this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(5, 0.0f, 15));
@@ -419,14 +611,10 @@ Scene::Scene(GLFWwindow* in_window)
 
 void Scene::Run()
 {
-	static const physx::PxU32 frameCount = 100;
-	initPhysics(false);
-	//for (physx::PxU32 i = 0; i < frameCount; i++)
-	//	stepPhysics(false);
-	//cleanupPhysics(false);
-	
+	initPhysics();
+
 	Loop();
-	cleanupPhysics(true);
+	cleanupPhysics();
 }
 
 void Scene::notify(EventType eventType, void* object) {
