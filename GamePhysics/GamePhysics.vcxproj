@@ -113,6 +113,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\lib\Release\x64;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\lib;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\lib\x64\v141\Debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\bin\win.x86_64.vc142.md\debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\snippets\Graphics\lib\win64\glut;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;glew32.lib;SOIL64.lib;assimp-vc140-mt.lib;PhysXExtensions_static_64.lib;PhysX_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCooking_64.lib;PhysXCommon_64.lib;SnippetUtils_static_64.lib;SnippetRender_static_64.lib;PhysXFoundation_64.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,7 +139,6 @@
     <ClCompile Include="Callbacks.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
-    <ClCompile Include="Gift.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -168,14 +169,12 @@
     <ClInclude Include="Callbacks.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="DrawableObject.hpp" />
-    <ClInclude Include="Gift.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Models.hpp" />
     <ClInclude Include="ModelsLoader.hpp" />
     <ClInclude Include="Models\building.h" />
     <ClInclude Include="Models\bushes.h" />
-    <ClInclude Include="Models\gift.h" />
     <ClInclude Include="Models\plain.h" />
     <ClInclude Include="Models\skycube.h" />
     <ClInclude Include="Models\skydome.h" />

@@ -24,7 +24,7 @@ private:
 	glm::vec3 target{ 0.f, 0.f, 0.f };
 	glm::vec3 up{ 0.f, 1.f, 0.f };
 
-	float fi = 1.5f * M_PI;
+	float fi = 1.5f * float(M_PI);
 	float psi = 0.f;
 	int sidewaysMovement = 0;
 	int forwardMovement = 0;

@@ -1,6 +1,5 @@
 #include "Scene.hpp"
 #include "Sphere.hpp"
-#include "Gift.hpp"
 #include "Plain.hpp"
 #include "SuziFlat.hpp"
 #include "SuziSmooth.hpp"
@@ -46,7 +45,7 @@ void Scene::Loop()
 
 		glClear(GL_DEPTH_BUFFER_BIT); //clear window content
 		const TimePoint now = std::chrono::high_resolution_clock::now(); //new current time
-		const float delta = std::chrono::duration_cast<Second>(now - lastTime).count(); //change of before and now time
+		const float delta = float(std::chrono::duration_cast<Second>(now - lastTime).count()); //change of before and now time
 
 		ambientLight.apply();
 		applyLights();
@@ -63,12 +62,13 @@ void Scene::Loop()
 			applyPhysXTransform();
 		}
 
+		stepPhysics();
+
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
 			this->drawable_object[i].updateObject(delta);
 			lastTime = now;
 		}
-		//initPhysics(true);
 
 		camera->update(delta);
 		lights[1]->update(camera->direction(), camera->position());
@@ -167,7 +167,7 @@ void Scene::placeModel(const int mouseX, const int mouseY)
 		pos.y = 0;
 		this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
 		drawable_object.back().Pos_mov(pos);
-		drawable_object.back().Pos_scale(0.3);
+		drawable_object.back().Pos_scale(0.3f);
 		Callbacks::updateObjects(std::ref(drawable_object));
 	}
 }
@@ -343,6 +343,24 @@ void Scene::createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3
 		printf("\t Mesh size: %d \n", meshSize);
 	}
 
+	physx::PxTransform tr = physx::PxTransform(*vertices);
+	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
+	physx::PxShape* meshShape;
+	if (meshActor)
+	{
+		//meshActor->setRigidDynamicFlag(physx::PxRigidDynamicFlag::eKINEMATIC, true);
+
+		physx::PxTriangleMeshGeometry triGeom;
+		triGeom.triangleMesh = triMesh;
+		//meshShape = physx::PxRigidActorExt::createExclusiveShape(*meshActor, triGeom,*gMaterial);
+		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
+		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
+		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);
+		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+		meshActor->attachShape(*meshShape);
+		gScene->addActor(*meshActor);
+	}
+
 	triMesh->release();
 }
 
@@ -380,11 +398,11 @@ void Scene::createTriangleMeshes(int i)
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
 	// are valid, so we perform a validation check in debug/checked builds.
-	physx::PxU32 numVertices = drawable_object.front().getModel()->meshes[i].vertices.size();
+	physx::PxU32 numVertices = drawable_object.front().getModel()->meshes[i].gVertices.size();
 	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
 	const physx::PxVec3* vertices = drawable_object.front().getModel()->meshes[i].gVertices.data();
 	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
-	physx::PxU32 numTriangles = drawable_object.front().getModel()->meshes[i].indices.size();
+	physx::PxU32 numTriangles = drawable_object.front().getModel()->meshes[i].indices.size() / 3;
 	const physx::PxU32* indices = drawable_object.front().getModel()->meshes[i].indices.data();
 	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
 	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
@@ -396,6 +414,12 @@ void Scene::createTriangleMeshes(int i)
 	meshDesc.triangles.count = numTriangles;
 	meshDesc.triangles.data = indices;
 	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+
+	bool meshDescValid = meshDesc.isValid();
+	if (!meshDescValid)
+	{
+		printf("Mesh description is not valid!\n");
+	}
 
 	physx::PxCookingParams params = gCooking->getParams();
 
@@ -433,9 +457,9 @@ void Scene::createTriangleMeshes(int i)
 	{
 		physx::PxDefaultMemoryOutputStream outBuffer;
 		gCooking->cookTriangleMesh(meshDesc, outBuffer);
-
 		physx::PxDefaultMemoryInputData stream(outBuffer.getData(), outBuffer.getSize());
 		triMesh = gPhysics->createTriangleMesh(stream);
+
 
 		meshSize = outBuffer.getSize();
 	}
@@ -454,6 +478,31 @@ void Scene::createTriangleMeshes(int i)
 	{
 		printf("\t Mesh size: %d \n", meshSize);
 	}
+
+	physx::PxRigidDynamic* dynamicObject = gPhysics->createRigidDynamic(physx::PxTransform(physx::PxVec3(0.0f)));
+	if (!dynamicObject)
+		printf("Failed to create PxRigidDynamic!\n");
+	dynamicObject->setMass(10.0f);
+	dynamicObject->setRigidBodyFlag(
+		physx::PxRigidBodyFlag::eKINEMATIC, true);
+
+	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(
+		*dynamicObject,
+		physx::PxTriangleMeshGeometry(triMesh,
+			physx::PxMeshScale()),
+		*gMaterial
+	);
+
+	physx::PxTransform localTm(physx::PxTransform(drawable_object.back().currPosition.x, drawable_object.back().currPosition.y, drawable_object.back().currPosition.z));
+	physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(localTm);
+	body->attachShape(*shape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+	gScene->addActor(*body);
+
+	if (!shape)
+		printf("Failed to create PxShape!\n");
+	else
+		//shape->release();
 
 	triMesh->release();
 	//delete[] vertices;
@@ -575,21 +624,21 @@ Scene::Scene(GLFWwindow* in_window)
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground", "Textures/white_tex.png"), drawable_object.size(), true));
-	//this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
 	
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
-	/*this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(5, 0.0f, 15));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(glm::vec3(25, 0.1f, 5));
 	this->drawable_object.back().rotate(90.0f, glm::vec3(0, 1, 0));
-	*/
+	
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
