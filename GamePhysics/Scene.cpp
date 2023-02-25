@@ -253,10 +253,14 @@ void Scene::initPhysics()
 	physx::PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
 
-	for (int i = 0; i < drawable_object.front().getModel()->meshes.size(); i++)
+	for (int j = 0; j < drawable_object.size(); j++)
 	{
-		createTriangleMeshes(i);
+		for (int i = 0; i < drawable_object[j].getModel()->meshes.size(); i++)
+		{
+			createTriangleMeshes(i, j);
+		}
 	}
+	
 
 	//for (physx::PxU32 i = 0; i < 5; i++)
 	//	createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
@@ -343,23 +347,7 @@ void Scene::createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3
 		printf("\t Mesh size: %d \n", meshSize);
 	}
 
-	physx::PxTransform tr = physx::PxTransform(*vertices);
-	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
-	physx::PxShape* meshShape;
-	if (meshActor)
-	{
-		//meshActor->setRigidDynamicFlag(physx::PxRigidDynamicFlag::eKINEMATIC, true);
-
-		physx::PxTriangleMeshGeometry triGeom;
-		triGeom.triangleMesh = triMesh;
-		//meshShape = physx::PxRigidActorExt::createExclusiveShape(*meshActor, triGeom,*gMaterial);
-		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
-		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
-		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);
-		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
-		meshActor->attachShape(*meshShape);
-		gScene->addActor(*meshActor);
-	}
+	
 
 	triMesh->release();
 }
@@ -390,7 +378,7 @@ void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMe
 		params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
 }
 
-void Scene::createTriangleMeshes(int i)
+void Scene::createTriangleMeshes(int i, int j)
 {
 	printf("-----------------------------------------------\n");
 	printf("Create triangles mesh using BVH34 midphase: \n\n");
@@ -398,12 +386,12 @@ void Scene::createTriangleMeshes(int i)
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
 	// are valid, so we perform a validation check in debug/checked builds.
-	physx::PxU32 numVertices = drawable_object.front().getModel()->meshes[i].gVertices.size();
+	physx::PxU32 numVertices = drawable_object[j].getModel()->meshes[i].gVertices.size();
 	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
-	const physx::PxVec3* vertices = drawable_object.front().getModel()->meshes[i].gVertices.data();
+	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
 	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
-	physx::PxU32 numTriangles = drawable_object.front().getModel()->meshes[i].indices.size() / 3;
-	const physx::PxU32* indices = drawable_object.front().getModel()->meshes[i].indices.data();
+	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
+	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
 	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
 	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 
@@ -479,6 +467,7 @@ void Scene::createTriangleMeshes(int i)
 		printf("\t Mesh size: %d \n", meshSize);
 	}
 
+	/*
 	physx::PxRigidDynamic* dynamicObject = gPhysics->createRigidDynamic(physx::PxTransform(physx::PxVec3(0.0f)));
 	if (!dynamicObject)
 		printf("Failed to create PxRigidDynamic!\n");
@@ -506,6 +495,24 @@ void Scene::createTriangleMeshes(int i)
 
 	triMesh->release();
 	//delete[] vertices;
+	*/
+	physx::PxTransform tr = physx::PxTransform(*vertices);
+	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
+	physx::PxShape* meshShape;
+	if (meshActor)
+	{
+		//meshActor->setRigidDynamicFlag(physx::PxRigidDynamicFlag::eKINEMATIC, true);
+
+		physx::PxTriangleMeshGeometry triGeom;
+		triGeom.triangleMesh = triMesh;
+		//meshShape = physx::PxRigidActorExt::createExclusiveShape(*meshActor, triGeom,*gMaterial);
+		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
+		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
+		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+		meshActor->attachShape(*meshShape);
+		gScene->addActor(*meshActor);
+	}
 }
 
 void Scene::stepPhysics()

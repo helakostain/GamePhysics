@@ -65,7 +65,7 @@ private:
 	void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
 
 	void initPhysics();
-	void createTriangleMeshes(int i);
+	void createTriangleMeshes(int i, int j);
 	void createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices,
 		bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf);
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
