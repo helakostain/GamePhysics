@@ -59,22 +59,13 @@ private:
 
 	physx::PxPvd* gPvd = NULL;
 
-	physx::PxReal stackZ = 10.0f;
-	
-	physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
-	void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
-
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);
-	void createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices,
-		bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf);
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
 
 	void stepPhysics();
 	void cleanupPhysics();
-	void keyPress(unsigned char key, const physx::PxTransform& camera);
-	
-	bool toPhysxActor(int i);
+
 	void applyPhysXTransform();
 public:
 	Scene(GLFWwindow* window);

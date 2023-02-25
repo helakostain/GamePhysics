@@ -197,32 +197,6 @@ void Scene::onButtonPress(const MouseData& mouseData) {
 	}
 }
 
-physx::PxRigidDynamic* Scene::createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
-{
-	physx::PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
-	dynamic->setAngularDamping(0.5f);
-	dynamic->setLinearVelocity(velocity);
-	gScene->addActor(*dynamic);
-	return dynamic;
-}
-
-void Scene::createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent)
-{
-	physx::PxShape* shape = gPhysics->createShape(physx::PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
-	for (physx::PxU32 i = 0; i < size; i++)
-	{
-		for (physx::PxU32 j = 0; j < size - i; j++)
-		{
-			physx::PxTransform localTm(physx::PxVec3(physx::PxReal(j * 2) - physx::PxReal(size - i), physx::PxReal(i * 2 + 1), 0) * halfExtent);
-			physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(t.transform(localTm));
-			body->attachShape(*shape);
-			physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-			gScene->addActor(*body);
-		}
-	}
-	shape->release();
-}
-
 void Scene::initPhysics()
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -275,81 +249,6 @@ void Scene::initPhysics()
 
 	//if (!interactive)
 	//	createDynamic(physx::PxTransform(physx::PxVec3(0, 40, 100)), physx::PxSphereGeometry(10), physx::PxVec3(0, -50, -100));
-}
-
-void Scene::createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices, bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf)
-{
-	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
-
-	physx::PxTriangleMeshDesc meshDesc;
-	meshDesc.points.count = numVertices;
-	meshDesc.points.data = vertices;
-	meshDesc.points.stride = sizeof(physx::PxVec3);
-	meshDesc.triangles.count = numTriangles;
-	meshDesc.triangles.data = indices;
-	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
-
-	physx::PxCookingParams params = gCooking->getParams();
-
-	// Create BVH34 midphase
-	params.midphaseDesc = physx::PxMeshMidPhase::eBVH34;
-
-	// setup common cooking params
-	setupCommonCookingParams(params, skipMeshCleanup, skipEdgeData);
-
-	// Cooking mesh with less triangles per leaf produces larger meshes with better runtime performance
-	// and worse cooking performance. Cooking time is better when more triangles per leaf are used.
-	params.midphaseDesc.mBVH34Desc.numPrimsPerLeaf = numTrisPerLeaf;
-
-	gCooking->setParams(params);
-
-#if defined(PX_CHECKED) || defined(PX_DEBUG)
-	// If DISABLE_CLEAN_MESH is set, the mesh is not cleaned during the cooking. 
-	// We should check the validity of provided triangles in debug/checked builds though.
-	if (skipMeshCleanup)
-	{
-		PX_ASSERT(gCooking->validateTriangleMesh(meshDesc));
-	}
-#endif // DEBUG
-
-
-	physx::PxTriangleMesh* triMesh = NULL;
-	physx::PxU32 meshSize = 0;
-
-	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
-	if (false)
-	{
-		triMesh = gCooking->createTriangleMesh(meshDesc, gPhysics->getPhysicsInsertionCallback());
-	}
-	else
-	{
-		physx::PxDefaultMemoryOutputStream outBuffer;
-		gCooking->cookTriangleMesh(meshDesc, outBuffer);
-
-		physx::PxDefaultMemoryInputData stream(outBuffer.getData(), outBuffer.getSize());
-		triMesh = gPhysics->createTriangleMesh(stream);
-
-		meshSize = outBuffer.getSize();
-	}
-
-	// Print the elapsed time for comparison
-	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
-	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
-	printf("\t -----------------------------------------------\n");
-	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
-	inserted ? printf("\t\t Mesh inserted on\n") : printf("\t\t Mesh inserted off\n");
-	!skipEdgeData ? printf("\t\t Precompute edge data on\n") : printf("\t\t Precompute edge data off\n");
-	!skipMeshCleanup ? printf("\t\t Mesh cleanup on\n") : printf("\t\t Mesh cleanup off\n");
-	printf("\t\t Num triangles per leaf: %d \n", numTrisPerLeaf);
-	printf("\t Elapsed time in ms: %f \n", double(elapsedTime));
-	if (!inserted)
-	{
-		printf("\t Mesh size: %d \n", meshSize);
-	}
-
-	
-
-	triMesh->release();
 }
 
 void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData)
@@ -536,79 +435,6 @@ void Scene::cleanupPhysics()
 	gFoundation->release();
 
 	printf("PhysX done.\n");
-}
-
-void Scene::keyPress(unsigned char key, const physx::PxTransform& camera)
-{
-	switch (toupper(key))
-	{
-	case 'B':	createStack(physx::PxTransform(physx::PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f); break;
-	case ' ':	createDynamic(camera, physx::PxSphereGeometry(3.0f), camera.rotate(physx::PxVec3(0, 0, -1)) * 200);	break;
-	}
-}
-
-bool Scene::toPhysxActor(int i)
-{
-	physx::PxTriangleMeshDesc meshDesc;
-	meshDesc.points.count = drawable_object.front().getModel()->meshes[i].vertices.size();
-	meshDesc.points.stride = sizeof(Vertex);
-	meshDesc.points.data = &drawable_object.front().getModel()->meshes[i].vertices[0];
-	meshDesc.triangles.count = drawable_object.front().getModel()->meshes[i].indices.size();
-	meshDesc.triangles.stride = 3 * sizeof(uint32_t);
-	meshDesc.triangles.data = &drawable_object.front().getModel()->meshes[i].indices[0];
-
-	physx::PxDefaultMemoryOutputStream writeBuffer;
-	physx::PxTriangleMeshCookingResult::Enum result;
-	//physx::PxCookingParams cookingParams = physx::PxCookingParams(physx::PxTolerancesScale());
-	//cookingParams.meshWeldTolerance = 0.1f;
-	//cookingParams.meshPreprocessParams = physx::PxMeshPreprocessingFlag::eWELD_VERTICES;
-	gScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 2);
-	if (!gCooking)
-		printf("PxCreateCooking failed!");
-	if (gCooking->validateTriangleMesh(meshDesc))
-	{
-		bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
-		if (!status)
-			printf("cooking failed!\n");
-			return false;
-	}
-	else
-	{
-		printf("Validation of cooking failed!\n");
-		return false;
-	}
-	
-
-	physx::PxDefaultMemoryInputData readBuffer(writeBuffer.getData(),
-		writeBuffer.getSize());
-	physx::PxTriangleMesh* triangleMesh =
-		gPhysics->createTriangleMesh(readBuffer);
-
-	physx::PxRigidDynamic* dynamicObject = gPhysics->createRigidDynamic(physx::PxTransform(physx::PxVec3(0.0f)));
-	if (!dynamicObject)
-		return false;
-	dynamicObject->setMass(10.0f);
-	dynamicObject->setRigidBodyFlag(
-		physx::PxRigidBodyFlag::eKINEMATIC, true);
-
-	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(
-		*dynamicObject,
-		physx::PxTriangleMeshGeometry(triangleMesh,
-			physx::PxMeshScale()),
-		*gMaterial
-	);
-
-	physx::PxTransform localTm( physx::PxTransform(drawable_object.back().currPosition.x, drawable_object.back().currPosition.y, drawable_object.back().currPosition.z));
-	physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(localTm);
-	body->attachShape(*shape);
-	physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-	gScene->addActor(*body);
-
-	if (!shape)
-		return false;
-	else
-		shape->release();
-		return true;
 }
 
 void Scene::applyPhysXTransform()
