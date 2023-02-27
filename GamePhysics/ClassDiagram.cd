@@ -1,11 +1,333 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Application">
-    <Position X="9.75" Y="1.5" Width="1.5" />
+  <Class Name="Application" Collapsed="true">
+    <Position X="18.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AACIAAAAABAAAAQAQAAAAAAAAABCAAwIAAAAAAABAAI=</HashCode>
       <FileName>Application.hpp</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="Bushes" Collapsed="true">
+    <Position X="8.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAgAAAAAAAAAAAAAAAAAAAAACAAABAAA=</HashCode>
+      <FileName>Bushes.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Callbacks" Collapsed="true">
+    <Position X="20" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAwARAAAAAAgAAAIAAABAASABAAAmAAAAQBA=</HashCode>
+      <FileName>Callbacks.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Camera" Collapsed="true">
+    <Position X="3.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABACEABAEoAAIEACIAAQMQIDwBgAAEAgAQBIUgAGgSA=</HashCode>
+      <FileName>Camera.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ColoredLight" Collapsed="true">
+    <Position X="14.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAEAAAAAAAAAAAAAAAAAABAACAgAAIoAAMAAA=</HashCode>
+      <FileName>Light.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CubeMap" Collapsed="true">
+    <Position X="1" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Texture.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DirectionalLight" Collapsed="true">
+    <Position X="13.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQgAAAAAIAAAAAAAAAAAAAABAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Light.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DrawableObject" Collapsed="true">
+    <Position X="4.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YgAQgIAECgAACggAAAEwAAAEgAAQAgAAAxACBCAYYgA=</HashCode>
+      <FileName>DrawableObject.hpp</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="models" />
+      <Field Name="shaders" />
+      <Field Name="transformations" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Mesh" Collapsed="true">
+    <Position X="21.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAQIAAAAAIAEAAAAAAAAAAAAAQAgIAAQAAAABAAAA=</HashCode>
+      <FileName>Mesh.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models" Collapsed="true">
+    <Position X="7.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAggCAAABQAiAAACIAAAAAAAEAACACAAgSAABE4AA=</HashCode>
+      <FileName>Models.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModelsLoader" Collapsed="true">
+    <Position X="23.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAgAAAgAgAACKAQAwAAIAAQAAAAAAAAAAIAAA=</HashCode>
+      <FileName>ModelsLoader.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Mouse" Collapsed="true">
+    <Position X="10.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIQAAQAAAAAAAAAAQAAAAEAAgABAAAAAAABwAEAAAAA=</HashCode>
+      <FileName>Mouse.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MoveBezier" Collapsed="true">
+    <Position X="8.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAIAAAAAAAAEAACAAAAAAAAAA=</HashCode>
+      <FileName>MoveBezier.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MoveCircle" Collapsed="true">
+    <Position X="6.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAACACAAAMAAAAAAAIAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MoveCircle.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MoveLine" Collapsed="true">
+    <Position X="10.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAACACAAIAQAAAAAIAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MoveLine.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MovementCalculator" Collapsed="true">
+    <Position X="18.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAIAAAAAAAAAAAAAAAACAAiAAAAIAAQAAAAEAgA=</HashCode>
+      <FileName>MovementCalculator.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Observable" Collapsed="true">
+    <Position X="6.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAACAAAIAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>Observer.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Plain" Collapsed="true">
+    <Position X="12.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAgAAAAAAAAAAAAAAAAAAAgACAAAAAAA=</HashCode>
+      <FileName>Plain.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PositionedLight" Collapsed="true">
+    <Position X="15.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAACAAAAAIAACAAABAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Light.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Scene" Collapsed="true">
+    <Position X="8" Y="7.5" Width="1.5" />
+    <NestedTypes>
+      <Typedef Name="Scene::TimePoint" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scene.hpp</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="Scene::Second" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scene.hpp</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AIAABAEoFoCCQCAIgIEIAEEMwIIBAAAoAgAgQAAAAAI=</HashCode>
+      <FileName>Scene.hpp</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="camera" />
+      <Field Name="mouse" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Shader" Collapsed="true">
+    <Position X="3.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAEQAAABAAAAAAAAAIEAAYEBAggAASAAMFADQCAQASA=</HashCode>
+      <FileName>Shader.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ShaderInstances" Collapsed="true">
+    <Position X="20" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAEAQCAAAAAAAACAABAAABAQAIQBAAIAABACBA=</HashCode>
+      <FileName>ShaderInstances.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ShaderLoader" Collapsed="true">
+    <Position X="0.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAMEACAAAAAAAAAAAAAAAAAAAAAAAEAAAAIAAAQAAA=</HashCode>
+      <FileName>ShaderLoader.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Skybox" Collapsed="true">
+    <Position X="21.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAghCAAAAAAgAAgAAAAAAAAAAAAAAAAAACAEAEAAA=</HashCode>
+      <FileName>Skybox.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sphere" Collapsed="true">
+    <Position X="10.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAgAAAAQAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Sphere.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Spotlight" Collapsed="true">
+    <Position X="15.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAIAAEAAAAAAAAAAABAIAAgAAIAAAEAAA=</HashCode>
+      <FileName>Light.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SuziFlat" Collapsed="true">
+    <Position X="3.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAwAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>SuziFlat.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SuziSmooth" Collapsed="true">
+    <Position X="1.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAgAAAAAAAAAAAAAAAAAAAAACAAAAEAA=</HashCode>
+      <FileName>SuziSmooth.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Texture" Collapsed="true">
+    <Position X="1" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAIAAAAAAAAAAAAAAAQBAABAAAAIAAAAAAAA=</HashCode>
+      <FileName>Texture.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TextureAlreadyExistsException" Collapsed="true">
+    <Position X="23.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Texture.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TextureManager" Collapsed="true">
+    <Position X="18.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEBAAAAAAAAAAQAAAQAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>Texture.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TextureNotFoundException" Collapsed="true">
+    <Position X="20" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Texture.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Transformation" Collapsed="true">
+    <Position X="4.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAwAAFAABAAACAIQoECQASgCCBAEggQAAQAAAAAAHEQ=</HashCode>
+      <FileName>Transformation.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tree" Collapsed="true">
+    <Position X="6" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAACAAgAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Tree.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Material" Collapsed="true">
+    <Position X="18.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QABBAAAAAAAAAAAAAAAAAAIAAIAAEAAAAAAAAABAAAA=</HashCode>
+      <FileName>Mesh.hpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MouseData" Collapsed="true">
+    <Position X="20" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAYAAAAAAAAIAAIAAAAAAAAAAACAABgAAAABAA=</HashCode>
+      <FileName>Mouse.hpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MovementCurve" Collapsed="true">
+    <Position X="8.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MovementCalculator.hpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Observer" Collapsed="true">
+    <Position X="3.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Observer.hpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Vertex" Collapsed="true">
+    <Position X="21.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAIAgAAAAAAAAAAAAAEAAAAAA=</HashCode>
+      <FileName>Mesh.hpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="Direction" Collapsed="true">
+    <Position X="18.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAACAAAAAAAAAAAAAAAIAAAAAAAAAgAAgAA=</HashCode>
+      <FileName>Transformation.hpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="EventType" Collapsed="true">
+    <Position X="20" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAFAAAAAAAAgAAAAAIAAAgAAA=</HashCode>
+      <FileName>Observer.hpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="gl::Light" Collapsed="true">
+    <Position X="23.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAgAAEAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Light.hpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Growth" Collapsed="true">
+    <Position X="21.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Transformation.hpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Rotation" Collapsed="true">
+    <Position X="18.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Transformation.hpp</FileName>
+    </TypeIdentifier>
+  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>
