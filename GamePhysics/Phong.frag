@@ -144,4 +144,8 @@ void main () {
     }
 
     out_color = vec4(ambientColor + fragColor, 1);
+
+    //TODO: gamma correction test (need polishing ALOT)
+    float gamma = 1.2;
+    out_color = vec4(pow(ambientColor, vec3(1.0/gamma)) + fragColor, 1);
 }

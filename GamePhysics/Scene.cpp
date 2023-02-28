@@ -18,6 +18,9 @@ void Scene::Loop()
 	TimePoint lastTime = std::chrono::high_resolution_clock::now(); //current time
 	skybox->Draw();
 
+	//Gamma correction
+	//glEnable(GL_FRAMEBUFFER_SRGB); 
+
 	glClear(GL_DEPTH_BUFFER_BIT); //clear window content
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
@@ -259,6 +262,8 @@ void Scene::initPhysics()
 		// Free memory allocated for actors array
 		delete[] actors;
 	}
+
+	printf("Physx initialized!\n");
 }
 
 void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData)
@@ -290,7 +295,7 @@ void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMe
 void Scene::createTriangleMeshes(int i, int j)
 {
 	printf("-----------------------------------------------\n");
-	printf("Create triangles mesh using BVH34 midphase: \n\n");
+	printf("Create triangles mesh kinematic actor using BVH34 midphase: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -448,7 +453,7 @@ void Scene::createTriangleMeshes(int i, int j)
 void Scene::createConvexMeshes(int i, int j)
 {
 	printf("-----------------------------------------------\n");
-	printf("Create convex mesh using BVH34 midphase: \n\n");
+	printf("Create convex mesh dynamic actor: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -580,7 +585,7 @@ void Scene::createConvexMeshes(int i, int j)
 void Scene::createStaticActor(int i, int j)
 {
 	printf("-----------------------------------------------\n");
-	printf("Create triangles mesh using BVH34 midphase: \n\n");
+	printf("Create triangles mesh static actor: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -651,6 +656,21 @@ void Scene::createStaticActor(int i, int j)
 		meshSize = outBuffer.getSize();
 	}
 
+	physx::PxTransform tr = physx::PxTransform(physx::PxVec3(1.0f));
+	physx::PxRigidStatic* meshActor = gPhysics->createRigidStatic(tr);
+	physx::PxShape* meshShape;
+	if (meshActor)
+	{
+		physx::PxTriangleMeshGeometry triGeom;
+		triGeom.triangleMesh = triMesh;
+		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
+		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].currPosition.x, drawable_object[j].currPosition.y, drawable_object[j].currPosition.z)));
+
+		meshActor->attachShape(*meshShape);
+		gScene->addActor(*meshActor);
+	}
+
 	// Print the elapsed time for comparison
 	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
@@ -664,74 +684,6 @@ void Scene::createStaticActor(int i, int j)
 	if (!true)
 	{
 		printf("\t Mesh size: %d \n", meshSize);
-	}
-
-	/*
-	physx::PxRigidDynamic* dynamicObject = gPhysics->createRigidDynamic(physx::PxTransform(physx::PxVec3(0.0f)));
-	if (!dynamicObject)
-		printf("Failed to create PxRigidDynamic!\n");
-	dynamicObject->setMass(10.0f);
-	dynamicObject->setRigidBodyFlag(
-		physx::PxRigidBodyFlag::eKINEMATIC, true);
-
-	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(
-		*dynamicObject,
-		physx::PxTriangleMeshGeometry(triMesh,
-			physx::PxMeshScale()),
-		*gMaterial
-	);
-
-	physx::PxTransform localTm(physx::PxTransform(drawable_object.back().currPosition.x, drawable_object.back().currPosition.y, drawable_object.back().currPosition.z));
-	physx::PxRigidDynamic* body = gPhysics->createRigidDynamic(localTm);
-	body->attachShape(*shape);
-	physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-	gScene->addActor(*body);
-
-	if (!shape)
-		printf("Failed to create PxShape!\n");
-	else
-		//shape->release();
-
-	triMesh->release();
-	//delete[] vertices;
-	*/
-	//physx::PxTransform tr = physx::PxTransform(*vertices);
-	physx::PxTransform tr = physx::PxTransform(physx::PxVec3(1.0f));
-	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
-	physx::PxShape* meshShape;
-	if (meshActor)
-	{
-		physx::PxTriangleMeshGeometry triGeom;
-		triGeom.triangleMesh = triMesh;
-		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
-		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
-		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].currPosition.x, drawable_object[j].currPosition.y, drawable_object[j].currPosition.z)));
-
-		//TODO pridat rotace, aktualne je tam jen pozice!
-		//glm::quat rotQuat = glm::quat_cast(drawable_object[j].getTransformation()->matrix());
-		//meshShape->setLocalPose(physx::PxTransform(physx::PxQuat(rotQuat.x, rotQuat.y, rotQuat.z, rotQuat.w)));
-
-		physx::PxFilterData filterData;
-		filterData.word0 = 1 << 0; // Set the first bit to 1 for kinematic actors
-		filterData.word1 = 1 << 1; // Set the second bit to 1 for default collision flag
-		meshShape->setSimulationFilterData(filterData);
-
-		meshActor->attachShape(*meshShape);
-		meshActor->setMass(16.0f);
-		meshActor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
-		gScene->addActor(*meshActor);
-
-
-		//this moves the actors
-		physx::PxTransform currentPose = meshActor->getGlobalPose();
-		physx::PxVec3 newVelocity = physx::PxVec3(10.0f, 0.0f, 0.0f); // Set the new velocity to (1, 0, 0)
-
-		// Set the target pose to the current pose with the new velocity
-		physx::PxTransform newPose(currentPose.p, currentPose.q);
-		newPose.p += newVelocity * (1.0f / 60.0f); // Multiply velocity by timeStep to get the position change
-		meshActor->setKinematicTarget(newPose);
 	}
 }
 
@@ -779,21 +731,21 @@ Scene::Scene(GLFWwindow* in_window)
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(0, 0.f, 10));
+	this->drawable_object.back().Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10, 0.0f, 5));
+	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(5, 0.0f, 15));
+	this->drawable_object.back().Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
 	//TODO: swiss house nejde prevest do convex meshe
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));
-	//this->drawable_object.back().Pos_mov(glm::vec3(25, 0.1f, 5));
-	//this->drawable_object.back().rotate(90.0f, glm::vec3(0, 1, 0));
+	//this->drawable_object.back().Pos_mov(glm::vec3(25.0f, 0.1f, 5.0f));
+	//this->drawable_object.back().rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
