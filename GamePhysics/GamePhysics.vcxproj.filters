@@ -57,25 +57,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Zdrojové soubory</Filter>
     </ClCompile>
-    <ClCompile Include="Bushes.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Plain.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
     <ClCompile Include="Skybox.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="SuziFlat.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="SuziSmooth.cpp">
-      <Filter>Zdrojové soubory\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Tree.cpp">
       <Filter>Zdrojové soubory\Models</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
@@ -140,25 +122,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bushes.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Plain.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
     <ClInclude Include="Skybox.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="SuziFlat.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="SuziSmooth.hpp">
-      <Filter>Hlavičkové soubory\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Tree.hpp">
       <Filter>Hlavičkové soubory\Models</Filter>
     </ClInclude>
     <ClInclude Include="Application.hpp">
@@ -224,29 +188,11 @@
     <ClInclude Include="Models\building.h">
       <Filter>Soubory zdrojů\Model\house</Filter>
     </ClInclude>
-    <ClInclude Include="Models\plain.h">
-      <Filter>Soubory zdrojů\Model\plain</Filter>
-    </ClInclude>
     <ClInclude Include="Models\skycube.h">
       <Filter>Soubory zdrojů\Model\skybox</Filter>
     </ClInclude>
     <ClInclude Include="Models\skydome.h">
       <Filter>Soubory zdrojů\Model\skydome</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\bushes.h">
-      <Filter>Soubory zdrojů\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\suzi_flat.h">
-      <Filter>Soubory zdrojů\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\suzi_smooth.h">
-      <Filter>Soubory zdrojů\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\tree.h">
-      <Filter>Soubory zdrojů\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\sphere.h">
-      <Filter>Soubory zdrojů\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

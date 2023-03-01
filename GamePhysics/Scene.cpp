@@ -1,10 +1,4 @@
 #include "Scene.hpp"
-#include "Sphere.hpp"
-#include "Plain.hpp"
-#include "SuziFlat.hpp"
-#include "SuziSmooth.hpp"
-#include "Tree.hpp"
-#include "Bushes.hpp"
 #include "ShaderInstances.hpp"
 #include "Skybox.hpp"
 #include "MoveCircle.hpp"
@@ -26,7 +20,7 @@ void Scene::Loop()
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
+	
 	for (int i = 0; i < this->drawable_object.size(); i++) //first draw of scene
 	{
 		this->drawable_object[i].updateObject(0.f);
@@ -110,10 +104,10 @@ void Scene::initAndEmplace(std::shared_ptr<ColoredLight>& light)
 void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::Light type)
 {
 	std::shared_ptr<ColoredLight> light = createLight(color, pos, type);
-	this->drawable_object.emplace_back(new Sphere(), ShaderInstances::constant(), drawable_object.size());
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(pos);
 	this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
-	this->drawable_object.back().Pos_scale(0.25);
+	//this->drawable_object.back().Pos_scale(0.25);
 	initAndEmplace(light);
 	applyLights();
 }
@@ -121,10 +115,9 @@ void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::L
 void Scene::emplaceLight(glm::vec3 color, glm::vec3 pos, glm::vec3 dir, float cutoff)
 {
 	std::shared_ptr<ColoredLight> light = std::make_shared<Spotlight>(color, pos, dir, cutoff);
-	this->drawable_object.emplace_back(new Sphere(), ShaderInstances::constant(), drawable_object.size());
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
 	this->drawable_object.back().Pos_mov(pos);
 	this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
-	this->drawable_object.back().Pos_scale(0.25);
 	initAndEmplace(light);
 	applyLights();
 }

@@ -104,14 +104,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glm-master;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\freeglut-3.4.0\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\source\physxextensions\src;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\pxshared\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\source\foundation\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Knihovny\glfw-3.3.8.bin.WIN64\include;..\..\Knihovny\glew-2.1.0\include;..\..\Knihovny\glm-master;..\..\Knihovny\soil\include;..\..\Knihovny\assimp\include;..\..\Knihovny\freeglut-3.4.0\include;..\..\Knihovny\PhysX-4.1\physx\include;..\..\Knihovny\PhysX-4.1\physx\source\physxextensions\src;..\..\Knihovny\PhysX-4.1\pxshared\include;..\..\Knihovny\PhysX-4.1\physx\source\foundation\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glew-2.1.0\lib\Release\x64;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\soil\lib;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\assimp\lib\x64\v141\Debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\bin\win.x86_64.vc142.md\debug;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\PhysX-4.1\physx\snippets\Graphics\lib\win64\glut;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Knihovny\glew-2.1.0\lib\Release\x64;..\..\Knihovny\glfw-3.3.8.bin.WIN64\lib-vc2022;..\..\Knihovny\soil\lib;..\..\Knihovny\assimp\lib\x64\v141\Debug;..\..\Knihovny\PhysX-4.1\physx\bin\win.x86_64.vc142.md\debug;..\..\Knihovny\PhysX-4.1\physx\snippets\Graphics\lib\win64\glut;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;glew32.lib;SOIL64.lib;assimp-vc140-mt.lib;PhysXExtensions_static_64.lib;PhysX_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCooking_64.lib;PhysXCommon_64.lib;SnippetUtils_static_64.lib;SnippetRender_static_64.lib;PhysXFoundation_64.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
@@ -135,7 +135,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Bushes.cpp" />
     <ClCompile Include="Callbacks.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
@@ -150,22 +149,16 @@
     <ClCompile Include="MoveLine.cpp" />
     <ClCompile Include="MovementCalculator.cpp" />
     <ClCompile Include="Observer.cpp" />
-    <ClCompile Include="Plain.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderInstances.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="SuziFlat.cpp" />
-    <ClCompile Include="SuziSmooth.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Transformation.cpp" />
-    <ClCompile Include="Tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
-    <ClInclude Include="Bushes.hpp" />
     <ClInclude Include="Callbacks.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="DrawableObject.hpp" />
@@ -174,32 +167,21 @@
     <ClInclude Include="Models.hpp" />
     <ClInclude Include="ModelsLoader.hpp" />
     <ClInclude Include="Models\building.h" />
-    <ClInclude Include="Models\bushes.h" />
-    <ClInclude Include="Models\plain.h" />
     <ClInclude Include="Models\skycube.h" />
     <ClInclude Include="Models\skydome.h" />
-    <ClInclude Include="Models\sphere.h" />
-    <ClInclude Include="Models\suzi_flat.h" />
-    <ClInclude Include="Models\suzi_smooth.h" />
-    <ClInclude Include="Models\tree.h" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="MoveBezier.hpp" />
     <ClInclude Include="MoveCircle.hpp" />
     <ClInclude Include="MoveLine.hpp" />
     <ClInclude Include="MovementCalculator.hpp" />
     <ClInclude Include="Observer.hpp" />
-    <ClInclude Include="Plain.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="ShaderInstances.hpp" />
     <ClInclude Include="ShaderLoader.hpp" />
     <ClInclude Include="Skybox.hpp" />
-    <ClInclude Include="Sphere.hpp" />
-    <ClInclude Include="SuziFlat.hpp" />
-    <ClInclude Include="SuziSmooth.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Transformation.hpp" />
-    <ClInclude Include="Tree.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
