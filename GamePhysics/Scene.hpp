@@ -51,13 +51,11 @@ private:
 	physx::PxFoundation* gFoundation = NULL;
 	physx::PxPhysics* gPhysics = NULL;
 	physx::PxCooking* gCooking = NULL;
-
 	physx::PxDefaultCpuDispatcher* gDispatcher = NULL;
 	physx::PxScene* gScene = NULL;
-
 	physx::PxMaterial* gMaterial = NULL;
-
 	physx::PxPvd* gPvd = NULL;
+
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);

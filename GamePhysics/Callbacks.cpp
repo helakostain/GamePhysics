@@ -23,25 +23,25 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
     case GLFW_KEY_I:
         if (model_id > 1)
         {
-            drawableObj[model_id].setFy((action == GLFW_RELEASE) ? Direction::none : Direction::up);
+            drawableObj[model_id].getModel()->setFy((action == GLFW_RELEASE) ? Direction::none : Direction::up);
         }
         break;
     case GLFW_KEY_K:
         if (model_id > 1)
         {
-            drawableObj[model_id].setFy((action == GLFW_RELEASE) ? Direction::none : Direction::down);
+            drawableObj[model_id].getModel()->setFy((action == GLFW_RELEASE) ? Direction::none : Direction::down);
         }
         break;
     case GLFW_KEY_J:
         if (model_id > 1)
         {
-            drawableObj[model_id].setFx((action == GLFW_RELEASE) ? Direction::none : Direction::left);
+            drawableObj[model_id].getModel()->setFx((action == GLFW_RELEASE) ? Direction::none : Direction::left);
         }
         break;
     case GLFW_KEY_L:
         if (model_id > 1)
         {
-            drawableObj[model_id].setFx((action == GLFW_RELEASE) ? Direction::none : Direction::right);
+            drawableObj[model_id].getModel()->setFx((action == GLFW_RELEASE) ? Direction::none : Direction::right);
         }
         break;
     case GLFW_KEY_W:
@@ -77,25 +77,25 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
     case GLFW_KEY_U:
         if (model_id > 1)
         {
-            drawableObj[model_id].setRot((action == GLFW_RELEASE) ? Rotation::none : Rotation::left);
+            drawableObj[model_id].getModel()->setRot((action == GLFW_RELEASE) ? Rotation::none : Rotation::left);
         }
         break;
     case GLFW_KEY_O:
         if (model_id > 1)
         {
-            drawableObj[model_id].setRot((action == GLFW_RELEASE) ? Rotation::none : Rotation::right);
+            drawableObj[model_id].getModel()->setRot((action == GLFW_RELEASE) ? Rotation::none : Rotation::right);
         }
         break;
     case GLFW_KEY_KP_ADD:
         if (model_id > 1)
         {
-            drawableObj[model_id].setGrow((action == GLFW_RELEASE) ? Growth::none : Growth::grow);
+            drawableObj[model_id].getModel()->setGrow((action == GLFW_RELEASE) ? Growth::none : Growth::grow);
         }
         break;
     case GLFW_KEY_KP_SUBTRACT:
         if (model_id > 1)
         {
-            drawableObj[model_id].setGrow((action == GLFW_RELEASE) ? Growth::none : Growth::shrink);
+            drawableObj[model_id].getModel()->setGrow((action == GLFW_RELEASE) ? Growth::none : Growth::shrink);
         }
         break;
     case GLFW_KEY_DELETE:

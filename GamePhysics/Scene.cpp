@@ -48,18 +48,8 @@ void Scene::Loop()
 		applyLights();
 
 		//physx part
-		
-		physx::PxScene* scene;
-		PxGetPhysics().getScenes(&scene, 1);
-		physx::PxU32 nbActors = scene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC);
-		if (nbActors)
-		{
-			std::vector<physx::PxRigidActor*> actors(nbActors);
-			scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
-			applyPhysXTransform();
-		}
-
-		stepPhysics();
+		applyPhysXTransform();
+		//stepPhysics();
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
@@ -105,8 +95,10 @@ void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::L
 {
 	std::shared_ptr<ColoredLight> light = createLight(color, pos, type);
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(pos);
-	this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
+	//this->drawable_object.back().Pos_mov(pos);
+	this->drawable_object.back().getModel()->Pos_mov(pos);
+	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
 	//this->drawable_object.back().Pos_scale(0.25);
 	initAndEmplace(light);
 	applyLights();
@@ -116,8 +108,10 @@ void Scene::emplaceLight(glm::vec3 color, glm::vec3 pos, glm::vec3 dir, float cu
 {
 	std::shared_ptr<ColoredLight> light = std::make_shared<Spotlight>(color, pos, dir, cutoff);
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(pos);
-	this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
+	//this->drawable_object.back().Pos_mov(pos);
+	this->drawable_object.back().getModel()->Pos_mov(pos);
+	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
 	initAndEmplace(light);
 	applyLights();
 }
@@ -162,8 +156,10 @@ void Scene::placeModel(const int mouseX, const int mouseY)
 		auto pos = glm::unProject(screenX, camera->view(), camera->project(), viewport);
 		pos.y = 0;
 		this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
-		drawable_object.back().Pos_mov(pos);
-		drawable_object.back().Pos_scale(0.3f);
+		//drawable_object.back().Pos_mov(pos);
+		drawable_object.back().getModel()->Pos_mov(pos);
+		//drawable_object.back().Pos_scale(0.3f);
+		drawable_object.back().getModel()->Pos_scale(0.3f);
 		Callbacks::updateObjects(std::ref(drawable_object));
 	}
 }
@@ -239,23 +235,6 @@ void Scene::initPhysics()
 			}
 		}
 	}
-
-	physx::PxActor** actors = nullptr;
-	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
-	if (numActors > 0) {
-		actors = new physx::PxActor * [numActors];
-		gScene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC, actors, numActors);
-
-		// Iterate through each actor
-		for (physx::PxU32 i = 0; i < numActors; i++) {
-			// Do something with each actor
-			physx::PxActor* actor = actors[i];
-		}
-
-		// Free memory allocated for actors array
-		delete[] actors;
-	}
-
 	printf("Physx initialized!\n");
 }
 
@@ -415,7 +394,7 @@ void Scene::createTriangleMeshes(int i, int j)
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
 		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
 		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].currPosition.x, drawable_object[j].currPosition.y, drawable_object[j].currPosition.z)));
+		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		//TODO pridat rotace, aktualne je tam jen pozice!
 		//glm::quat rotQuat = glm::quat_cast(drawable_object[j].getTransformation()->matrix());
@@ -500,7 +479,7 @@ void Scene::createConvexMeshes(int i, int j)
 
 	physx::PxTriangleMesh* triMesh = NULL;
 	physx::PxU32 meshSize = 0;
-	bool insertion = false;
+	bool insertion = true;
 	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
 	if (insertion)
 	{
@@ -544,7 +523,7 @@ void Scene::createConvexMeshes(int i, int j)
 			return;
 		}
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].currPosition.x, drawable_object[j].currPosition.y, drawable_object[j].currPosition.z)));
+		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		//TODO pridat rotace, aktualne je tam jen pozice!
 		//glm::quat rotQuat = glm::quat_cast(drawable_object[j].getTransformation()->matrix());
@@ -632,7 +611,7 @@ void Scene::createStaticActor(int i, int j)
 
 	physx::PxTriangleMesh* triMesh = NULL;
 	physx::PxU32 meshSize = 0;
-	bool insertion = false;
+	bool insertion = true;
 	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
 	if (insertion)
 	{
@@ -658,7 +637,7 @@ void Scene::createStaticActor(int i, int j)
 		triGeom.triangleMesh = triMesh;
 		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].currPosition.x, drawable_object[j].currPosition.y, drawable_object[j].currPosition.z)));
+		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		meshActor->attachShape(*meshShape);
 		gScene->addActor(*meshActor);
@@ -684,6 +663,8 @@ void Scene::stepPhysics()
 {
 	gScene->simulate(1.0f / 60.0f);
 	gScene->fetchResults(true);
+	
+	
 }
 
 void Scene::cleanupPhysics()
@@ -705,6 +686,26 @@ void Scene::cleanupPhysics()
 
 void Scene::applyPhysXTransform()
 {
+	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+	physx::PxActor** actors = new physx::PxActor * [numActors];
+	gScene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC, actors, numActors);
+
+
+	// Iterate through actors and get their position
+	//for (physx::PxU32 i = 0; i < numActors; i++)
+	//{
+	if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
+	{
+		physx::PxRigidActor* rigidActor = static_cast<physx::PxRigidActor*>(actors[1]);
+		physx::PxTransform actorTransform = rigidActor->getGlobalPose();
+		physx::PxVec3 actorPosition = actorTransform.p;
+		this->drawable_object[1].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), 5);
+		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
+	}
+	//}
+
+	// Release memory for actors array
+	delete[] actors;
 }
 
 
@@ -724,7 +725,7 @@ Scene::Scene(GLFWwindow* in_window)
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	
@@ -733,7 +734,7 @@ Scene::Scene(GLFWwindow* in_window)
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
-	this->drawable_object.back().Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
 	//TODO: swiss house nejde prevest do convex meshe
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));

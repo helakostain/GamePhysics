@@ -34,6 +34,10 @@ protected:
 
 	GLuint VBO;
 	GLuint VAO;
+
+	int actorID;
+	//Transformation* transformations;
+	std::vector<Transformation> transformations;
 public:
 	Models();
 	Models(const float in_points[], int size_points);
@@ -52,5 +56,19 @@ public:
 	// 3D models
 	void addMesh(Mesh&& mesh);
 	void draw(uint32_t id, Shader* shader) const;
+	void applyPhysxTransf(glm::vec3 a, int actorID);
 	int get_size_points();
+	int getActorID();
+
+	Transformation* getTransformation(int i);
+	void DoTransformations(const double delta);
+	void Pos_scale(float a);
+	void setFy(Direction dir);
+	void setFx(Direction dir);
+	void setRot(Rotation r);
+	void setGrow(Growth g);
+	void Pos_mov(glm::vec3 a);
+	glm::vec3 currPosition = { 0,0,0 };
+	void rotate(float degree, glm::vec3 axis);
+	void setPos(glm::vec3 position);
 };

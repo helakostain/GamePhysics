@@ -9,7 +9,7 @@ DrawableObject::DrawableObject(Models* model, const char* vertex_path, const cha
     this->models = model;
     this->models->Init();
     this->shaders = new Shader(vertex_path, fragment_path);
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->isObject = false;
     this->id = size;
     this->size_points = model->get_size_points();
@@ -20,7 +20,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, int size)
     this->models = model;
     this->models->Init();
     this->shaders = &shader;
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
     this->id = size;
@@ -32,7 +32,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Movemen
     this->models = model;
     this->models->Init();
     this->shaders = &shader;
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
     this->id = size;
@@ -45,7 +45,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->models = model;
     this->models->Init();
     this->shaders = &shader;
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = false;
     this->id = size;
@@ -56,7 +56,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 {
     this->models = model;
     this->shaders = &shader;
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
     this->id = size;
@@ -68,21 +68,25 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->movementCalculator = movement;
     this->models = model;
     this->shaders = &shader;
-    this->transformations = new Transformation();
+    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
     this->id = size;
     this->size_points = model->get_size_points();
 }
-
+/*
 void DrawableObject::DoTransformations(const double delta)
 {
     this->transformations->Update(delta);
 }
-
+*/
 void DrawableObject::sendShaderMatrix()
 {
-    this->shaders->setMatrix(this->transformations->matrix());
+    //this->shaders->setMatrix(this->transformations->matrix());
+    for (int i = 0; i < this->getModel()->meshes.size(); i++)
+    {
+        this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
+    }
 }
 
 bool DrawableObject::SetUp()
@@ -91,7 +95,7 @@ bool DrawableObject::SetUp()
     this->models->Bind();
     return true;
 }
-
+/*
 void DrawableObject::Pos_scale(float a)
 {
     this->transformations->scale(a);
@@ -119,7 +123,7 @@ void DrawableObject::Pos_mov(glm::vec3 a)
     this->currPosition = a;
     this->transformations->translate(a);
 }
-
+*/
 void DrawableObject::Draw()
 {
     this->models->Draw();
@@ -133,7 +137,8 @@ void DrawableObject::updateObject(const float delta)
         models->Bind();
         glStencilFunc(GL_ALWAYS, id + 1, 0xFF);
     }
-    transformations->Update(delta);
+    this->models->DoTransformations(delta);
+    //transformations->Update(delta);
     if (movementCalculator != nullptr)
         this->updateMovement(delta);
     sendShaderMatrix();
@@ -156,19 +161,23 @@ void DrawableObject::updateObject(const float delta)
 void DrawableObject::applyTexture(std::shared_ptr<Texture> texture)
 {
 }
-
+/*
 void DrawableObject::rotate(float degree, glm::vec3 axis)
 {
     this->transformations->rotate(degree, axis);
 }
-
+*/
 void DrawableObject::updateMovement(double delta)
 {
     movementCalculator->update(delta);
-    transformations->setPosition(movementCalculator->currentPosition());
-    transformations->rotate(movementCalculator->currentHeading().x, glm::vec3(1, 0, 0));
-    transformations->rotate(movementCalculator->currentHeading().y, glm::vec3(0, 1, 0));
-    transformations->rotate(movementCalculator->currentHeading().z, glm::vec3(0, 0, 1));
+    this->models->setPos(movementCalculator->currentPosition());
+    //transformations->setPosition(movementCalculator->currentPosition());
+    this->models->rotate(movementCalculator->currentHeading().x, glm::vec3(1, 0, 0));
+    //transformations->rotate(movementCalculator->currentHeading().x, glm::vec3(1, 0, 0));
+    this->models->rotate(movementCalculator->currentHeading().y, glm::vec3(0, 1, 0));
+    //transformations->rotate(movementCalculator->currentHeading().y, glm::vec3(0, 1, 0));
+    this->models->rotate(movementCalculator->currentHeading().z, glm::vec3(0, 0, 1));
+    //transformations->rotate(movementCalculator->currentHeading().z, glm::vec3(0, 0, 1));
 }
 
 int DrawableObject::getId()
@@ -186,10 +195,12 @@ Models* DrawableObject::getModel()
     return this->models;
 }
 
+/*
 Transformation* DrawableObject::getTransformation()
 {
     return this->transformations;
 }
+*/
 
 Shader& DrawableObject::getShader()
 {

@@ -63,6 +63,7 @@ void Models::setIds(GLuint vID, GLuint fID)
 void Models::addMesh(Mesh&& mesh)
 {
 	meshes.emplace_back(std::move(mesh));
+	transformations.push_back(Transformation());
 }
 
 void Models::draw(uint32_t id, Shader* shader) const
@@ -72,7 +73,92 @@ void Models::draw(uint32_t id, Shader* shader) const
 	}
 }
 
+void Models::applyPhysxTransf(glm::vec3 a, int actorID)
+{
+	this->transformations[actorID].translate(a);
+}
+
 int Models::get_size_points()
 {
 	return this->size_points;
+}
+
+int Models::getActorID()
+{
+	return this->actorID;
+}
+
+Transformation* Models::getTransformation(int i)
+{
+	return &this->transformations[i];
+}
+
+void Models::DoTransformations(const double delta)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].Update(delta);
+	}
+}
+
+void Models::Pos_scale(float a)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].scale(a);
+	}
+}
+
+void Models::setFy(Direction dir)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].applyFy(dir);
+	}
+}
+void Models::setFx(Direction dir)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].applyFx(dir);
+	}
+}
+void Models::setRot(Rotation r)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].setRotation(r);
+	}
+}
+void Models::setGrow(Growth g)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].setGrowth(g);
+	}
+}
+
+void Models::Pos_mov(glm::vec3 a)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].translate(a);
+	}
+	this->currPosition = a;
+}
+
+void Models::rotate(float degree, glm::vec3 axis)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].rotate(degree, axis);
+	}
+}
+
+void Models::setPos(glm::vec3 position)
+{
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		this->transformations[i].setPosition(position);
+	}
 }
