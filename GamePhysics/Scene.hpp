@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include <ctype.h>
+#include <algorithm>
 #include "DrawableObject.hpp"
 #include "Camera.hpp"
 #include "Shader.hpp"
@@ -17,6 +18,8 @@
 #include "PsTime.h"
 #include <GLFW/glfw3.h> // DO NOT MOVE UP!!!!!!
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 class Scene : public Observer
 {
 private:
@@ -56,6 +59,7 @@ private:
 	physx::PxMaterial* gMaterial = NULL;
 	physx::PxPvd* gPvd = NULL;
 
+	std::unordered_map<physx::PxActor*, int> actorID;
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);

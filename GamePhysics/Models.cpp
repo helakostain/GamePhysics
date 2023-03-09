@@ -75,17 +75,14 @@ void Models::draw(uint32_t id, Shader* shader) const
 
 void Models::applyPhysxTransf(glm::vec3 a, int actorID)
 {
-	this->transformations[actorID].translate(a);
+	//this->transformations[actorID].translate(a);
+	this->transformations[actorID].setPosition(a);
+	this->currPosition = a;
 }
 
 int Models::get_size_points()
 {
 	return this->size_points;
-}
-
-int Models::getActorID()
-{
-	return this->actorID;
 }
 
 Transformation* Models::getTransformation(int i)

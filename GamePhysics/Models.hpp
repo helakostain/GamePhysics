@@ -35,7 +35,6 @@ protected:
 	GLuint VBO;
 	GLuint VAO;
 
-	int actorID;
 	//Transformation* transformations;
 	std::vector<Transformation> transformations;
 public:
@@ -58,7 +57,8 @@ public:
 	void draw(uint32_t id, Shader* shader) const;
 	void applyPhysxTransf(glm::vec3 a, int actorID);
 	int get_size_points();
-	int getActorID();
+
+	std::vector<int> actorIDs;
 
 	Transformation* getTransformation(int i);
 	void DoTransformations(const double delta);

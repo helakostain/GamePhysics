@@ -50,6 +50,4 @@ public:
 	Models* getModel();
 	//Transformation* getTransformation();
 	//glm::vec3 currPosition = { 0,0,0 };
-
-	Shader& getShader();
 };

@@ -201,8 +201,3 @@ Transformation* DrawableObject::getTransformation()
     return this->transformations;
 }
 */
-
-Shader& DrawableObject::getShader()
-{
-    return *this->shaders;
-}

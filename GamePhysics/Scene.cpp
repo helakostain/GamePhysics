@@ -236,6 +236,31 @@ void Scene::initPhysics()
 		}
 	}
 	printf("Physx initialized!\n");
+	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+	physx::PxActor** actors = new physx::PxActor * [numActors];
+	gScene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC, actors, numActors);
+	for (int i = 0; i < numActors; i++)
+	{
+		int foundID = actorID[actors[i]];
+		bool flagFound = false;
+		int meshID;
+		for (int j = 0; j < drawable_object.size(); j++)
+		{
+			if (flagFound)
+			{
+				break;
+			}
+			for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
+			{
+				if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
+				{
+					meshID = foundID;
+				}
+			}
+		}
+		//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
+	}
+	delete[] actors;
 }
 
 void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData)
@@ -535,6 +560,9 @@ void Scene::createConvexMeshes(int i, int j)
 		physx::PxRigidBodyExt::updateMassAndInertia(*meshActor, 1.6f);
 		gScene->addActor(*meshActor);
 
+		actorID[meshActor] = i;
+		drawable_object[j].getModel()->actorIDs.push_back(i);
+
 		//TODO: zrychlit!, pridat aby ground byl static a ne dynamic actor, zaridit aby se to tak nerozbijelo, mrknout na github linky v onenotu
 	}
 
@@ -692,22 +720,49 @@ void Scene::applyPhysXTransform()
 
 
 	// Iterate through actors and get their position
-	//for (physx::PxU32 i = 0; i < numActors; i++)
-	//{
-	if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
+	for (physx::PxU32 i = 0; i < numActors; i++)
 	{
-		physx::PxRigidActor* rigidActor = static_cast<physx::PxRigidActor*>(actors[1]);
-		physx::PxTransform actorTransform = rigidActor->getGlobalPose();
-		physx::PxVec3 actorPosition = actorTransform.p;
-		this->drawable_object[1].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), 5);
-		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
+	//if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
+	//{
+		if (auto found = actorID.find(actors[i]); found != actorID.end())
+		{
+			int foundID = actorID[actors[i]];
+			//std::cout << "Actor num: " << foundID << " was found." << std::endl;
+			physx::PxRigidActor* rigidActor = static_cast<physx::PxRigidActor*>(actors[i]);
+			physx::PxTransform actorTransform = rigidActor->getGlobalPose();
+			physx::PxVec3 actorPosition = actorTransform.p;
+
+			bool flagFound = false;
+			int meshID;
+			int drawObjID = 0;
+			for (int j = 0; j < drawable_object.size(); j++)
+			{
+				if (flagFound)
+				{
+					break;
+				}
+				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
+				{
+					if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
+					{
+						meshID = foundID;
+						drawObjID = j;
+					}
+				}
+			}
+			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
+			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
+			std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
+			std::cout << "After: " << glm::to_string(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z)) << std::endl;
+			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
+			//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
+		}
 	}
 	//}
 
 	// Release memory for actors array
 	delete[] actors;
 }
-
 
 Scene::Scene(GLFWwindow* in_window)
 {
