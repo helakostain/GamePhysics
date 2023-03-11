@@ -11,7 +11,7 @@ class DrawableObject
 {
 private:
 	Models* models;
-	Shader* shaders;
+	//Shader* shaders;
 	//Transformation* transformations;
 	shared_ptr<Texture> texture;
 	shared_ptr<MovementCalculator> movementCalculator = nullptr;
@@ -32,7 +32,7 @@ public:
 	DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, shared_ptr<MovementCalculator> movement, int size, bool object);
 
 	//void DoTransformations(const double delta);
-	void sendShaderMatrix();
+	void sendShaderMatrix(int i);
 	bool SetUp();
 	/*void Pos_scale(float a);
 	void setFy(Direction dir);

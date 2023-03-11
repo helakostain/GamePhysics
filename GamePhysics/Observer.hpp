@@ -6,7 +6,8 @@ enum class EventType {
 	MouseButtonReleased,
 	MouseMoved,
 	LightChanged,
-	CameraMoved
+	CameraMoved,
+	PhysxChanged
 };
 
 struct Observer {

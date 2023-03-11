@@ -1,4 +1,5 @@
 #include "Models.hpp"
+#include "ShaderInstances.hpp"
 
 void Models::GenerateVBO()
 {
@@ -60,24 +61,35 @@ void Models::setIds(GLuint vID, GLuint fID)
 	this->VBO = fID;
 }
 
+void Models::setShader(Shader* shader)
+{
+	this->shader = shader;
+}
+
 void Models::addMesh(Mesh&& mesh)
 {
 	meshes.emplace_back(std::move(mesh));
-	transformations.push_back(Transformation());
+	transformations.push_back(new Transformation());
+	shaders.push_back(new Shader(ShaderInstances::phong()));
 }
 
-void Models::draw(uint32_t id, Shader* shader) const
+void Models::draw(uint32_t id, int i) const
 {
-	for (const Mesh& mesh : meshes) {
-		mesh.bindAndDraw(id, shader);
-	}
+	//int i = 0;
+	//for (const Mesh& mesh : meshes) {
+	meshes[i].bindAndDraw(id, shaders[i]);
+		//mesh.bindAndDraw(id, shaders[i]);
+		//i++;
+	//}
 }
 
-void Models::applyPhysxTransf(glm::vec3 a, int actorID)
+void Models::applyPhysxTransf(glm::mat4 a, int actorID)
 {
 	//this->transformations[actorID].translate(a);
-	this->transformations[actorID].setPosition(a);
-	this->currPosition = a;
+	//this->transformations[actorID]->setPosition(a[3]);
+	this->currPosition = a[3];
+	this->transformations[actorID]->setMatrix(a);
+	//this->shaders[actorID]->updatePosition(a);
 }
 
 int Models::get_size_points()
@@ -87,22 +99,22 @@ int Models::get_size_points()
 
 Transformation* Models::getTransformation(int i)
 {
-	return &this->transformations[i];
+	return this->transformations[i];
 }
 
-void Models::DoTransformations(const double delta)
+void Models::DoTransformations(const double delta, int i)
 {
-	for (int i = 0; i < meshes.size(); i++)
-	{
-		this->transformations[i].Update(delta);
-	}
+	//for (int i = 0; i < meshes.size(); i++)
+	//{
+		this->transformations[i]->Update(delta);
+	//}
 }
 
 void Models::Pos_scale(float a)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].scale(a);
+		this->transformations[i]->scale(a);
 	}
 }
 
@@ -110,28 +122,28 @@ void Models::setFy(Direction dir)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].applyFy(dir);
+		this->transformations[i]->applyFy(dir);
 	}
 }
 void Models::setFx(Direction dir)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].applyFx(dir);
+		this->transformations[i]->applyFx(dir);
 	}
 }
 void Models::setRot(Rotation r)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].setRotation(r);
+		this->transformations[i]->setRotation(r);
 	}
 }
 void Models::setGrow(Growth g)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].setGrowth(g);
+		this->transformations[i]->setGrowth(g);
 	}
 }
 
@@ -139,7 +151,7 @@ void Models::Pos_mov(glm::vec3 a)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].translate(a);
+		this->transformations[i]->translate(a);
 	}
 	this->currPosition = a;
 }
@@ -148,7 +160,7 @@ void Models::rotate(float degree, glm::vec3 axis)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].rotate(degree, axis);
+		this->transformations[i]->rotate(degree, axis);
 	}
 }
 
@@ -156,6 +168,6 @@ void Models::setPos(glm::vec3 position)
 {
 	for (int i = 0; i < meshes.size(); i++)
 	{
-		this->transformations[i].setPosition(position);
+		this->transformations[i]->setPosition(position);
 	}
 }

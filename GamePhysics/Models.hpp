@@ -36,7 +36,9 @@ protected:
 	GLuint VAO;
 
 	//Transformation* transformations;
-	std::vector<Transformation> transformations;
+	std::vector<Transformation*> transformations;
+	
+	Shader* shader;
 public:
 	Models();
 	Models(const float in_points[], int size_points);
@@ -47,21 +49,23 @@ public:
 	virtual void Draw();
 
 	void setIds(GLuint vID, GLuint fID);
+	void setShader(Shader* shader);
 
 	std::vector<Mesh> meshes;
 	std::vector<Material> materials;
 	std::string directory;
+	std::vector<Shader*> shaders;
 
 	// 3D models
 	void addMesh(Mesh&& mesh);
-	void draw(uint32_t id, Shader* shader) const;
-	void applyPhysxTransf(glm::vec3 a, int actorID);
+	void draw(uint32_t id, int i) const;
+	void applyPhysxTransf(glm::mat4 a, int actorID);
 	int get_size_points();
 
 	std::vector<int> actorIDs;
 
 	Transformation* getTransformation(int i);
-	void DoTransformations(const double delta);
+	void DoTransformations(const double delta, int i);
 	void Pos_scale(float a);
 	void setFy(Direction dir);
 	void setFx(Direction dir);

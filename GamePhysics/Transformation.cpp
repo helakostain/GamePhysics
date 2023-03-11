@@ -37,6 +37,11 @@ void Transformation::setPosition(glm::vec3 position)
 	transform[3] = glm::vec4(position, 1);
 }
 
+void Transformation::setMatrix(glm::mat4 newMatrix)
+{
+	this->transform = newMatrix;
+}
+
 void Transformation::scale(const glm::vec3 scales)
 {
 	transform = glm::scale(transform, scales);

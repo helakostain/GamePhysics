@@ -8,7 +8,8 @@ DrawableObject::DrawableObject(Models* model, const char* vertex_path, const cha
 {
     this->models = model;
     this->models->Init();
-    this->shaders = new Shader(vertex_path, fragment_path);
+    //this->shaders = new Shader(vertex_path, fragment_path);
+    this->getModel()->setShader(new Shader(vertex_path, fragment_path));
     //this->transformations = new Transformation();
     this->isObject = false;
     this->id = size;
@@ -19,7 +20,8 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, int size)
 {
     this->models = model;
     this->models->Init();
-    this->shaders = &shader;
+    //this->shaders = &shader;
+    this->getModel()->setShader(&shader);
     //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
@@ -31,7 +33,8 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Movemen
 {
     this->models = model;
     this->models->Init();
-    this->shaders = &shader;
+    //this->shaders = &shader;
+    this->getModel()->setShader(&shader);
     //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
@@ -44,7 +47,8 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 {
     this->models = model;
     this->models->Init();
-    this->shaders = &shader;
+    //this->shaders = &shader;
+    this->getModel()->setShader(&shader);
     //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = false;
@@ -55,7 +59,8 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object)
 {
     this->models = model;
-    this->shaders = &shader;
+    //this->shaders = &shader;
+    this->getModel()->setShader(&shader);
     //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
@@ -67,7 +72,8 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 {
     this->movementCalculator = movement;
     this->models = model;
-    this->shaders = &shader;
+    //this->shaders = &shader;
+    this->getModel()->setShader(&shader);
     //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
@@ -80,18 +86,24 @@ void DrawableObject::DoTransformations(const double delta)
     this->transformations->Update(delta);
 }
 */
-void DrawableObject::sendShaderMatrix()
+void DrawableObject::sendShaderMatrix(int i)
 {
     //this->shaders->setMatrix(this->transformations->matrix());
-    for (int i = 0; i < this->getModel()->meshes.size(); i++)
-    {
-        this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
-    }
+    //for (int i = 0; i < this->getModel()->meshes.size(); i++)
+    //{
+        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
+        this->getModel()->shaders[i]->setMatrix(this->getModel()->getTransformation(i)->matrix());
+    //}
 }
 
 bool DrawableObject::SetUp()
 {
-    this->shaders->Init();
+    //this->shaders->Init();
+    for (int i = 0; i < this->getModel()->meshes.size(); i++)
+    {
+        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
+        this->getModel()->shaders[i]->Init();
+    }
     this->models->Bind();
     return true;
 }
@@ -131,30 +143,42 @@ void DrawableObject::Draw()
 
 void DrawableObject::updateObject(const float delta)
 {
-    this->shaders->shaderUseProgram();
-    if (!isObject)
+    //this->shaders->shaderUseProgram();
+    for (int i = 0; i < this->getModel()->meshes.size(); i++)
     {
-        models->Bind();
-        glStencilFunc(GL_ALWAYS, id + 1, 0xFF);
-    }
-    this->models->DoTransformations(delta);
-    //transformations->Update(delta);
-    if (movementCalculator != nullptr)
-        this->updateMovement(delta);
-    sendShaderMatrix();
+        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
+        this->getModel()->shaders[i]->shaderUseProgram();
 
-    if (this->texture != nullptr)
-    {
-        this->texture->bind(this->shaders);
-    }
+        if (!isObject)
+        {
+            models->Bind();
+            glStencilFunc(GL_ALWAYS, id + 1, 0xFF);
+        }
+        this->models->DoTransformations(delta, i);
+        //transformations->Update(delta);
+        if (movementCalculator != nullptr)
+            this->updateMovement(delta); //NEFUNKCNI rozbije physx
+        sendShaderMatrix(i);
 
-    if (isObject)
-    {
-        models->draw(id + 1, this->shaders);
-    }
-    else
-    {
-        Draw();
+        if (this->texture != nullptr)
+        {
+            //this->texture->bind(this->shaders);
+
+            this->texture->bind(this->getModel()->shaders[i]);
+
+        }
+
+        if (isObject)
+        {
+            //models->draw(id + 1, this->shaders);
+
+            models->draw(id + 1, i);
+
+        }
+        else
+        {
+            Draw();
+        }
     }
 }
 

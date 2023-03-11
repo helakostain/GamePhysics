@@ -67,4 +67,5 @@ public:
 	void setRotation(Rotation rotation);
 	void rotate(float degree, glm::vec3 axis);
 	void setPosition(glm::vec3 position);
+	void setMatrix(glm::mat4 newMatrix);
 };
