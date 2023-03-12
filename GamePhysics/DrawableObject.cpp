@@ -56,7 +56,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->size_points = model->get_size_points();
 }
 
-DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object)
+DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object, int actorType)
 {
     this->models = model;
     //this->shaders = &shader;
@@ -66,6 +66,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
     this->isObject = object;
     this->id = size;
     this->size_points = model->get_size_points();
+    this->actorType = actorType;
 }
 
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, shared_ptr<MovementCalculator> movement, int size, bool object)
@@ -217,6 +218,11 @@ int DrawableObject::getSizePoints()
 Models* DrawableObject::getModel()
 {
     return this->models;
+}
+
+int DrawableObject::getActorType()
+{
+    return this->actorType;
 }
 
 /*

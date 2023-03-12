@@ -22,13 +22,15 @@ private:
 	bool isObject;
 	int id;
 	int size_points;
+
+	int actorType; //0 = Static; 1 = Dynamic, 2 = Kinematic
 public:
 	DrawableObject();
 	DrawableObject(Models* model, const char* vertex_path, const char* fragment_path, int size);
 	DrawableObject(Models* model, Shader& shader, int size);
 	DrawableObject(Models* model, Shader& shader, shared_ptr<MovementCalculator> movement, int size);
 	DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size);
-	DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object);
+	DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object, int actorType);
 	DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, shared_ptr<MovementCalculator> movement, int size, bool object);
 
 	//void DoTransformations(const double delta);
@@ -48,6 +50,7 @@ public:
 	int getId();
 	int getSizePoints();
 	Models* getModel();
+	int getActorType();
 	//Transformation* getTransformation();
 	//glm::vec3 currPosition = { 0,0,0 };
 };

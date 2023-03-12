@@ -94,7 +94,7 @@ void Scene::initAndEmplace(std::shared_ptr<ColoredLight>& light)
 void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::Light type)
 {
 	std::shared_ptr<ColoredLight> light = createLight(color, pos, type);
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(pos);
 	this->drawable_object.back().getModel()->Pos_mov(pos);
 	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
@@ -107,7 +107,7 @@ void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::L
 void Scene::emplaceLight(glm::vec3 color, glm::vec3 pos, glm::vec3 dir, float cutoff)
 {
 	std::shared_ptr<ColoredLight> light = std::make_shared<Spotlight>(color, pos, dir, cutoff);
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(pos);
 	this->drawable_object.back().getModel()->Pos_mov(pos);
 	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
@@ -155,7 +155,7 @@ void Scene::placeModel(const int mouseX, const int mouseY)
 		glm::vec4 viewport{ 0, 0, width, height };
 		auto pos = glm::unProject(screenX, camera->view(), camera->project(), viewport);
 		pos.y = 0;
-		this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
+		this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true, 0));
 		//drawable_object.back().Pos_mov(pos);
 		drawable_object.back().getModel()->Pos_mov(pos);
 		//drawable_object.back().Pos_scale(0.3f);
@@ -223,16 +223,18 @@ void Scene::initPhysics()
 	{
 		for (int i = 0; i < drawable_object[j].getModel()->meshes.size(); i++)
 		{
-			//createTriangleMeshes(i, j);
-
-			/*if (j == 0)
+			if (drawable_object[j].getActorType() == 0)
 			{
 				createStaticActor(i, j);
 			}
-			else
-			{*/
+			else if (drawable_object[j].getActorType() == 1)
+			{
 				createConvexMeshes(i, j);
-			//}
+			}
+			else if (drawable_object[j].getActorType() == 2)
+			{
+				createTriangleMeshes(i, j);
+			}
 		}
 	}
 	printf("Physx initialized!\n");
@@ -733,7 +735,7 @@ void Scene::applyPhysXTransform()
 			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
 			physx::PxVec3 actorPosition = actorTransform.p;
 
-			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
+			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
 
 			bool flagFound = false;
 			int meshID;
@@ -756,7 +758,7 @@ void Scene::applyPhysXTransform()
 			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
 			std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
-			std::cout << "After: " << glm::to_string(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z)) << std::endl;
+			std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, matrix.column3.z)) << std::endl;
 
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
 			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
@@ -785,23 +787,23 @@ Scene::Scene(GLFWwindow* in_window)
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true));
-	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true, 2));
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall", "Textures/white_tex.png"), drawable_object.size(), true));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("brick"), ShaderInstances::phong(), TextureManager::getOrEmplace("brick", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("brick"), ShaderInstances::phong(), TextureManager::getOrEmplace("brick", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
 	//TODO: swiss house nejde prevest do convex meshe
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(glm::vec3(25.0f, 0.1f, 5.0f));
 	//this->drawable_object.back().rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
