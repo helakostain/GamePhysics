@@ -63,6 +63,7 @@ private:
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);
+	void createCharacter(int i, int j);
 	void createConvexMeshes(int i, int j);
 	void createStaticActor(int i, int j);
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);

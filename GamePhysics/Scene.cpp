@@ -421,11 +421,6 @@ void Scene::createTriangleMeshes(int i, int j)
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
 		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
 		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
-
-		//TODO pridat rotace, aktualne je tam jen pozice!
-		//glm::quat rotQuat = glm::quat_cast(drawable_object[j].getTransformation()->matrix());
-		//meshShape->setLocalPose(physx::PxTransform(physx::PxQuat(rotQuat.x, rotQuat.y, rotQuat.z, rotQuat.w)));
 
 		physx::PxFilterData filterData;
 		filterData.word0 = 1 << 0; // Set the first bit to 1 for kinematic actors
@@ -435,6 +430,16 @@ void Scene::createTriangleMeshes(int i, int j)
 		meshActor->attachShape(*meshShape);
 		meshActor->setMass(16.0f);
 		meshActor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
+		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].x,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].y,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].x,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].y,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].x,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
+		meshActor->setGlobalPose(physx::PxTransform(matrix));
 		gScene->addActor(*meshActor);
 
 
@@ -550,13 +555,19 @@ void Scene::createConvexMeshes(int i, int j)
 			return;
 		}
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
-
-		//TODO pridat rotace, aktualne je tam jen pozice!
-		//glm::quat rotQuat = glm::quat_cast(drawable_object[j].getTransformation()->matrix());
-		//meshShape->setLocalPose(physx::PxTransform(physx::PxQuat(rotQuat.x, rotQuat.y, rotQuat.z, rotQuat.w)));
+		//meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		meshActor->attachShape(*meshShape);
+		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].x,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].y,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].x,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].y,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].x,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
+		meshActor->setGlobalPose(physx::PxTransform(matrix));
 		//meshActor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
 		
 		physx::PxRigidBodyExt::updateMassAndInertia(*meshActor, 1.6f);
@@ -667,9 +678,19 @@ void Scene::createStaticActor(int i, int j)
 		triGeom.triangleMesh = triMesh;
 		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
+		//meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		meshActor->attachShape(*meshShape);
+		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].x,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].y,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].x,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].y,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].x,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
+		meshActor->setGlobalPose(physx::PxTransform(matrix));
 		gScene->addActor(*meshActor);
 	}
 
@@ -798,6 +819,9 @@ Scene::Scene(GLFWwindow* in_window)
 	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("dog"), ShaderInstances::phong(), TextureManager::getOrEmplace("dog", "Textures/white_tex.png"), drawable_object.size(), true, 2));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, 0.0f));
 
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("brick"), ShaderInstances::phong(), TextureManager::getOrEmplace("brick", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
