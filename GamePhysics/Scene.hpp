@@ -58,12 +58,14 @@ private:
 	physx::PxScene* gScene = NULL;
 	physx::PxMaterial* gMaterial = NULL;
 	physx::PxPvd* gPvd = NULL;
+	physx::PxControllerManager* gControllerManager = NULL;
+	physx::PxController* gController = NULL;
 
 	std::unordered_map<physx::PxActor*, int> actorID;
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);
-	void createCharacter(int i, int j);
+	void createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::PxShape* shape);
 	void createConvexMeshes(int i, int j);
 	void createStaticActor(int i, int j);
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
@@ -72,6 +74,8 @@ private:
 	void cleanupPhysics();
 
 	void applyPhysXTransform();
+
+	void createForest();
 public:
 	Scene(GLFWwindow* window);
 

@@ -442,7 +442,7 @@ void Scene::createTriangleMeshes(int i, int j)
 		meshActor->setGlobalPose(physx::PxTransform(matrix));
 		gScene->addActor(*meshActor);
 
-
+		/*
 		//this moves the actors
 		physx::PxTransform currentPose = meshActor->getGlobalPose();
 		physx::PxVec3 newVelocity = physx::PxVec3(10.0f, 0.0f, 0.0f); // Set the new velocity to (1, 0, 0)
@@ -451,7 +451,41 @@ void Scene::createTriangleMeshes(int i, int j)
 		physx::PxTransform newPose(currentPose.p, currentPose.q);
 		newPose.p += newVelocity * (1.0f / 60.0f); // Multiply velocity by timeStep to get the position change
 		meshActor->setKinematicTarget(newPose);
+		*/
+
+		createCharacter(i, j, meshActor, meshShape);
 	}
+}
+
+void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::PxShape* shape)
+{
+	// Get the bounds of the triangle mesh actor
+	physx::PxBounds3 bounds = actor->getWorldBounds();
+	// Compute the height and radius of the capsule controller based on the bounds
+	physx::PxVec3 extents = bounds.getExtents();
+	float height = 2 * extents.y;
+	float radius = physx::PxMax(extents.x, extents.z);
+
+	gControllerManager = PxCreateControllerManager(*gScene);
+	gControllerManager->setOverlapRecoveryModule(true); //fixes actors on initial possition to not fall through ground etc
+	physx::PxCapsuleControllerDesc controllerDesc;
+	//controllerDesc.height = 1.8f;
+	controllerDesc.height = height;
+	//controllerDesc.radius = 0.5f;
+	controllerDesc.radius = radius;
+	controllerDesc.position = physx::PxExtendedVec3( actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z);
+	controllerDesc.material = gMaterial;
+	controllerDesc.slopeLimit = 0.5f;
+	controllerDesc.contactOffset = 0.1f;
+	controllerDesc.stepOffset = 0.2f;
+	//create callback:
+	//MyControllerCallback* controllerCallback = new MyControllerCallback();
+	//controllerDesc.reportCallback = controllerCallback; maybe to handle hits
+	gController = gControllerManager->createController(controllerDesc);
+	//controller->setUserData(controllerCallback);
+	gController->setUserData(actor);
+	gController->setFootPosition(physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z));
+	
 }
 
 void Scene::createConvexMeshes(int i, int j)
@@ -720,6 +754,11 @@ void Scene::stepPhysics()
 
 void Scene::cleanupPhysics()
 {
+	if (gControllerManager)
+	{
+		gControllerManager->purgeControllers();
+		gControllerManager->release();
+	}
 	gScene->release();
 	gDispatcher->release();
 	gPhysics->release();
@@ -756,7 +795,7 @@ void Scene::applyPhysXTransform()
 			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
 			physx::PxVec3 actorPosition = actorTransform.p;
 
-			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
+			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
 
 			bool flagFound = false;
 			int meshID;
@@ -779,7 +818,7 @@ void Scene::applyPhysXTransform()
 			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
 			std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
-			std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, matrix.column3.z)) << std::endl;
+			std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;
 
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
 			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
@@ -791,6 +830,16 @@ void Scene::applyPhysXTransform()
 
 	// Release memory for actors array
 	delete[] actors;
+}
+
+void Scene::createForest()
+{
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree0"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, -5.0f));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree1"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-24.0f, 0.3f, -8.0f));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree2"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-18.0f, 0.3f, -12.0f));
 }
 
 Scene::Scene(GLFWwindow* in_window)
@@ -809,27 +858,34 @@ Scene::Scene(GLFWwindow* in_window)
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.f, 10.0f));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true, 0));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
-	
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("plane"), ShaderInstances::phong(), TextureManager::getOrEmplace("plane", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("car"), ShaderInstances::phong(), TextureManager::getOrEmplace("car", "Textures/white_tex.png"), drawable_object.size(), true, 2));
-	//this->drawable_object.back().Pos_mov(glm::vec3(10.0f, 0.0f, 5.0f));
+
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("dog"), ShaderInstances::phong(), TextureManager::getOrEmplace("dog", "Textures/white_tex.png"), drawable_object.size(), true, 2));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, 0.0f));
 
+	createForest();
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("garage"), ShaderInstances::phong(), TextureManager::getOrEmplace("garage", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 6.0f));
+	this->drawable_object.back().getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("laboratory"), ShaderInstances::phong(), TextureManager::getOrEmplace("laboratory", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 27.0f));
+	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("pizza"), ShaderInstances::phong(), TextureManager::getOrEmplace("pizza", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 27.0f));
+	this->drawable_object.back().getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
 	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("brick"), ShaderInstances::phong(), TextureManager::getOrEmplace("brick", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
 	//TODO: swiss house nejde prevest do convex meshe
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	//this->drawable_object.back().Pos_mov(glm::vec3(25.0f, 0.1f, 5.0f));
-	//this->drawable_object.back().rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 5.0f));
+	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
@@ -839,7 +895,8 @@ Scene::Scene(GLFWwindow* in_window)
 	camera->registerObserver(ShaderInstances::phong_norm());
 	camera->registerObserver(ShaderInstances::skybox());
 
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, -50.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ -10.f, 50.f, 20.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, 20.f }, gl::Light::Directional); //SUN OR MOON
 	emplaceLight(glm::vec3{ 0.f, 1.f,1.f }, glm::vec3{ -1.f, 2.f, 5.f }, -glm::vec3{ 40.f, 8.f, 0.f }, 0); // FLASHLIGHT (spotlight) - position is set in while loop, zero at end is turned off
 	emplaceAmbientLight(glm::vec3{ .1f });
 
