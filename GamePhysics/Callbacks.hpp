@@ -13,6 +13,7 @@
 #include "Mouse.hpp"
 #include "Scene.hpp"
 #include "Light.hpp"
+//#include "PxPhysicsAPI.h"
 
 class Callbacks
 {
@@ -22,6 +23,8 @@ private:
 	static std::vector<DrawableObject> drawableObj;
 	static Camera* camera;
 	static shared_ptr<ColoredLight> flashlight;
+	//static physx::PxController* controller;
+	//static physx::PxScene* scene;
 
 	static void error_callback(int error, const char* description);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -39,4 +42,5 @@ public:
 	static void Init(GLFWwindow* window, std::vector<DrawableObject>& dO, Camera* camera);
 	static void setObject(int id);
 	static void updateObjects(std::vector<DrawableObject>& dObjects);
+	//static void updateCharacter(physx::PxController* cont);
 };

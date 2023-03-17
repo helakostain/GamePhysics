@@ -75,4 +75,6 @@ public:
 	glm::vec3 currPosition = { 0,0,0 };
 	void rotate(float degree, glm::vec3 axis);
 	void setPos(glm::vec3 position);
+
+	int moved = 0; // 1 = forward, 2 = back, 3 = left, 4 = right
 };

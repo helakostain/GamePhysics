@@ -57,6 +57,37 @@ void Scene::Loop()
 			lastTime = now;
 		}
 
+		// Call the move method on the controller
+		physx::PxControllerCollisionFlags collisionFlags;
+		physx::PxVec3 movement(0.0f, 0.0f, 0.0f);
+		switch (drawable_object[2].getModel()->moved)
+		{
+		case 0:
+			break;
+		case 1:
+			movement = physx::PxVec3(0.0f, 0.0f, 1.0f); // move one unit forward
+			drawable_object[2].getModel()->moved = 0;
+			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+			break;
+		case 2:
+			movement = physx::PxVec3(0.0f, 0.0f, -1.0f); // move one unit backward
+			drawable_object[2].getModel()->moved = 0;
+			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+			break;
+		case 3:
+			movement = physx::PxVec3(-1.0f, 0.0f, 0.0f); // move one unit left
+			drawable_object[2].getModel()->moved = 0;
+			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+			break;
+		case 4:
+			movement = physx::PxVec3(1.0f, 0.0f, 0.0f); // move one unit right
+			drawable_object[2].getModel()->moved = 0;
+			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+			break;
+		default:
+			break;
+		}
+
 		camera->update(delta);
 		lights[1]->update(camera->direction(), camera->position());
 
@@ -485,7 +516,7 @@ void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::P
 	//controller->setUserData(controllerCallback);
 	gController->setUserData(actor);
 	gController->setFootPosition(physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z));
-	
+	//Callbacks::updateCharacter(std::ref(gController));
 }
 
 void Scene::createConvexMeshes(int i, int j)
@@ -817,8 +848,8 @@ void Scene::applyPhysXTransform()
 			}
 			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
-			std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
-			std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;
+			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
+			//std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;
 
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
 			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
@@ -857,12 +888,12 @@ Scene::Scene(GLFWwindow* in_window)
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_low"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_low", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_with_fence"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_with_fence", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("dog"), ShaderInstances::phong(), TextureManager::getOrEmplace("dog", "Textures/white_tex.png"), drawable_object.size(), true, 2));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("character"), ShaderInstances::phong(), TextureManager::getOrEmplace("character", "Textures/white_tex.png"), drawable_object.size(), true, 2));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, 0.0f));
 
 	createForest();
@@ -879,13 +910,10 @@ Scene::Scene(GLFWwindow* in_window)
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 27.0f));
 	this->drawable_object.back().getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("brick"), ShaderInstances::phong(), TextureManager::getOrEmplace("brick", "Textures/white_tex.png"), drawable_object.size(), true, 1));
-	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
-
 	//TODO: swiss house nejde prevest do convex meshe
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 5.0f));
-	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
