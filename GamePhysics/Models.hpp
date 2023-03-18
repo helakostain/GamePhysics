@@ -77,4 +77,5 @@ public:
 	void setPos(glm::vec3 position);
 
 	int moved = 0; // 1 = forward, 2 = back, 3 = left, 4 = right
+	int last_moved = 3; // 1 = forward, 2 = back, 3 = left, 4 = right
 };
