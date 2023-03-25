@@ -32,6 +32,8 @@ void Scene::Loop()
 	ambientLight.apply();
 	applyLights();
 
+	//applyPhysXStatic();
+
 	const physx::PxVec3 gravity(0, -9.81f, 0); // -9.81 m/s^2 in the negative Y direction
 
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
@@ -65,7 +67,7 @@ void Scene::Loop()
 		physx::PxControllerState controllerState;
 		gController->getState(controllerState);
 		controllerState.deltaXP.y += gravity.y * delta;
-		switch (this->drawable_object[1].getModel()->moved)
+		switch (this->drawable_object[1].getModel()->moved) // HACK: natvrdo pozice modelu
 		{
 		case 0:
 			collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
@@ -91,7 +93,7 @@ void Scene::Loop()
 			break;
 		}
 		//drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		if (this->drawable_object[1].getModel()->moved != this->drawable_object[1].getModel()->last_moved && this->drawable_object[1].getModel()->moved != 0)
+		if (this->drawable_object[1].getModel()->moved != this->drawable_object[1].getModel()->last_moved && this->drawable_object[1].getModel()->moved != 0) // HACK: natvrdo pozice modelu
 		{
 			//TODO tohle nefunguje, kdovi proc
 			switch (this->drawable_object[1].getModel()->moved)
@@ -166,7 +168,7 @@ void Scene::Loop()
 			this->drawable_object[1].getModel()->last_moved = drawable_object[1].getModel()->moved;
 		}
 		
-		this->drawable_object[1].getModel()->moved = 0;
+		this->drawable_object[1].getModel()->moved = 0; // HACK: natvrdo pozice modelu
 
 		camera->update(delta);
 		lights[1]->update(camera->direction(), camera->position());
@@ -672,6 +674,7 @@ void Scene::createConvexMeshes(int i, int j)
 			return;
 		}
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		meshShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
 		//meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
 
 		meshActor->attachShape(*meshShape);
@@ -809,6 +812,9 @@ void Scene::createStaticActor(int i, int j)
 						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
 		meshActor->setGlobalPose(physx::PxTransform(matrix));
 		gScene->addActor(*meshActor);
+		//TODO prirazeni rozbije scenu
+		//actorID[meshActor] = i;
+		//drawable_object[j].getModel()->actorIDs.push_back(i);
 	}
 
 	// Print the elapsed time for comparison
@@ -915,7 +921,7 @@ void Scene::applyPhysXTransform()
 	physx::PxVec3 actorPosition = actorTransform.p;
 
 	glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
-	for (int i = 0; i < this->drawable_object[1].getModel()->meshes.size(); i++)
+	for (int i = 0; i < this->drawable_object[1].getModel()->meshes.size(); i++) // HACK: natvrdo pozice modelu
 	{
 		this->drawable_object[1].getModel()->applyPhysxTransf(openMatrix, i);
 		this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -923,6 +929,61 @@ void Scene::applyPhysXTransform()
 	}
 	//}
 
+	// Release memory for actors array
+	delete[] actors;
+}
+
+void Scene::applyPhysXStatic()
+{
+	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
+	physx::PxActor** actors = new physx::PxActor * [numActors];
+	gScene->getActors(physx::PxActorTypeFlag::eRIGID_STATIC, actors, numActors);
+
+	// Iterate through actors and get their position
+	for (physx::PxU32 i = 0; i < numActors; i++)
+	{
+		//if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
+		//{
+		if (auto found = actorID.find(actors[i]); found != actorID.end())
+		{
+			int foundID = actorID[actors[i]];
+			//std::cout << "Actor num: " << foundID << " was found." << std::endl;
+			physx::PxRigidActor* rigidActor = static_cast<physx::PxRigidActor*>(actors[i]);
+			physx::PxTransform actorTransform = rigidActor->getGlobalPose();
+			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
+			physx::PxVec3 actorPosition = actorTransform.p;
+
+			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
+
+			bool flagFound = false;
+			int meshID = 0;
+			int drawObjID = 0;
+			for (int j = 0; j < drawable_object.size(); j++)
+			{
+				if (flagFound)
+				{
+					break;
+				}
+				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
+				{
+					if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
+					{
+						meshID = foundID;
+						drawObjID = j;
+					}
+				}
+			}
+			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
+			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
+			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
+			//std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;	
+			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
+
+			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
+
+			//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
+		}
+	}
 	// Release memory for actors array
 	delete[] actors;
 }

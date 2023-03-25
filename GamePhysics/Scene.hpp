@@ -74,6 +74,7 @@ private:
 	void cleanupPhysics();
 
 	void applyPhysXTransform();
+	void applyPhysXStatic();
 
 	void createForest();
 public:
