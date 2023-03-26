@@ -81,11 +81,11 @@ void Scene::Loop()
 			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 			break;
 		case 3:
-			movement = physx::PxVec3(-1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit left
+			movement = physx::PxVec3(1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit left
 			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 			break;
 		case 4:
-			movement = physx::PxVec3(1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit right
+			movement = physx::PxVec3(-1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit right
 			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 			break;
 		default:
@@ -837,8 +837,6 @@ void Scene::stepPhysics()
 {
 	gScene->simulate(1.0f / 60.0f);
 	gScene->fetchResults(true);
-	
-	
 }
 
 void Scene::cleanupPhysics()
@@ -883,7 +881,7 @@ void Scene::applyPhysXTransform()
 			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
 			physx::PxVec3 actorPosition = actorTransform.p;
 
-			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
+			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
 
 			bool flagFound = false;
 			int meshID;
@@ -920,7 +918,7 @@ void Scene::applyPhysXTransform()
 	physx::PxMat44 matrix = physx::PxMat44(actorTransform);
 	physx::PxVec3 actorPosition = actorTransform.p;
 
-	glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
+	glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
 	for (int i = 0; i < this->drawable_object[1].getModel()->meshes.size(); i++) // HACK: natvrdo pozice modelu
 	{
 		this->drawable_object[1].getModel()->applyPhysxTransf(openMatrix, i);
@@ -953,7 +951,7 @@ void Scene::applyPhysXStatic()
 			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
 			physx::PxVec3 actorPosition = actorTransform.p;
 
-			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, -matrix.column3.z, matrix.column3.w);
+			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
 
 			bool flagFound = false;
 			int meshID = 0;
@@ -991,11 +989,11 @@ void Scene::applyPhysXStatic()
 void Scene::createForest()
 {
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree0"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, -5.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, -10.0f));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree1"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-24.0f, 0.3f, -8.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-24.0f, 0.3f, -13.0f));
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree2"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-18.0f, 0.3f, -12.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-18.0f, 0.3f, -17.0f));
 }
 
 Scene::Scene(GLFWwindow* in_window)
@@ -1020,24 +1018,24 @@ Scene::Scene(GLFWwindow* in_window)
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
-
+	
 	createForest();
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("garage"), ShaderInstances::phong(), TextureManager::getOrEmplace("garage", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 6.0f));
-	this->drawable_object.back().getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 1.0f));
+	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("laboratory"), ShaderInstances::phong(), TextureManager::getOrEmplace("laboratory", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 27.0f));
-	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 22.0f));
+	this->drawable_object.back().getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("pizza"), ShaderInstances::phong(), TextureManager::getOrEmplace("pizza", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 27.0f));
-	this->drawable_object.back().getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 22.0f));
+	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//TODO: swiss house nejde prevest do convex meshe
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 5.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 0.0f));
 	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	camera = new Camera();
@@ -1048,8 +1046,8 @@ Scene::Scene(GLFWwindow* in_window)
 	camera->registerObserver(ShaderInstances::phong_norm());
 	camera->registerObserver(ShaderInstances::skybox());
 
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ -10.f, 50.f, 20.f }, gl::Light::Directional); //SUN OR MOON
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, 20.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ -10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
 	emplaceLight(glm::vec3{ 0.f, 1.f,1.f }, glm::vec3{ -1.f, 2.f, 5.f }, -glm::vec3{ 40.f, 8.f, 0.f }, 0); // FLASHLIGHT (spotlight) - position is set in while loop, zero at end is turned off
 	emplaceAmbientLight(glm::vec3{ .1f });
 

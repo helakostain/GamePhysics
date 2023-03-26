@@ -20,11 +20,11 @@ private:
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)16.f / 9.f, 0.1f, 100.0f); // 16:9 aspect ratio
 	glm::mat4 camera;
 
-	glm::vec3 eye{ 0.f, 1.f, 3.f };
+	glm::vec3 eye{ 0.f, 5.f, -8.f };
 	glm::vec3 target{ 0.f, 0.f, 0.f };
 	glm::vec3 up{ 0.f, 1.f, 0.f };
 
-	float fi = 1.5f * float(M_PI);
+	float fi = -1.5f * float(M_PI);
 	float psi = 0.f;
 	int sidewaysMovement = 0;
 	int forwardMovement = 0;
