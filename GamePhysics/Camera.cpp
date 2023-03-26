@@ -130,6 +130,11 @@ void Camera::WindowChange(int width, int height)
 	apply();
 }
 
+void Camera::setCamera(glm::mat4 cam)
+{
+	this->camera = cam;
+}
+
 void Camera::notify(EventType eventType, void* object)
 {
 	if (eventType == EventType::MouseMoved)
@@ -156,4 +161,9 @@ glm::vec3 Camera::position() const
 glm::vec3 Camera::direction() const
 {
 	return this->target;
+}
+
+glm::vec3 Camera::getUp() const
+{
+	return this->up;
 }

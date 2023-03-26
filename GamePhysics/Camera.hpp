@@ -53,6 +53,7 @@ public:
 	void apply();
 	void onMouseMove(const MouseData& md);
 	void WindowChange(int width, int height);
+	void setCamera(glm::mat4 cam);
 
 	void notify(EventType eventType, void* object) override;
 
@@ -60,4 +61,5 @@ public:
 	glm::mat4 project() const;
 	glm::vec3 position() const;
 	glm::vec3 direction() const;
+	glm::vec3 getUp() const;
 };

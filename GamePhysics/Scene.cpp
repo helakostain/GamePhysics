@@ -52,123 +52,17 @@ void Scene::Loop()
 		applyLights();
 
 		//physx part
-		applyPhysXTransform();
+		applyPhysXTransform(delta, gravity);
 		//stepPhysics();
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
-			this->drawable_object[i].updateObject(delta);
+			if (i != 1) // HACK:: docasne odpohybovani psa
+			{
+				this->drawable_object[i].updateObject(delta);
+			}
 			lastTime = now;
 		}
-
-		// Call the move method on the controller
-		physx::PxControllerCollisionFlags collisionFlags;
-		physx::PxVec3 movement(0.0f, 0.0f, 0.0f);
-		physx::PxControllerState controllerState;
-		gController->getState(controllerState);
-		controllerState.deltaXP.y += gravity.y * delta;
-		switch (this->drawable_object[1].getModel()->moved) // HACK: natvrdo pozice modelu
-		{
-		case 0:
-			collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		case 1:
-			movement = physx::PxVec3(0.0f, 0.0f, 1.0f) + controllerState.deltaXP; // move one unit forward
-			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		case 2:
-			movement = physx::PxVec3(0.0f, 0.0f, -1.0f) + controllerState.deltaXP; // move one unit backward
-			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		case 3:
-			movement = physx::PxVec3(1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit left
-			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		case 4:
-			movement = physx::PxVec3(-1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit right
-			collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		default:
-			collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
-			break;
-		}
-		//drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		if (this->drawable_object[1].getModel()->moved != this->drawable_object[1].getModel()->last_moved && this->drawable_object[1].getModel()->moved != 0) // HACK: natvrdo pozice modelu
-		{
-			//TODO tohle nefunguje, kdovi proc
-			switch (this->drawable_object[1].getModel()->moved)
-			{
-			case 1:
-				switch (this->drawable_object[1].getModel()->last_moved)
-				{
-				case 2:
-					this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 3:
-					this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 4:
-					this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				default:
-					break;
-				}
-				break;
-			case 2:
-				switch (this->drawable_object[1].getModel()->last_moved)
-				{
-				case 1:
-					this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 3:
-					this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 4:
-					this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				default:
-					break;
-				}
-				break;
-			case 3:
-				switch (this->drawable_object[1].getModel()->last_moved)
-				{
-				case 1:
-					this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 2:
-					this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 4:
-					this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				default:
-					break;
-				}
-				break;
-			case 4:
-				switch (this->drawable_object[1].getModel()->last_moved)
-				{
-				case 1:
-					this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 2:
-					this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 3:
-					this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				default:
-					break;
-				}
-				break;
-			default:
-				break;
-			}
-			this->drawable_object[1].getModel()->last_moved = drawable_object[1].getModel()->moved;
-		}
-		
-		this->drawable_object[1].getModel()->moved = 0; // HACK: natvrdo pozice modelu
 
 		camera->update(delta);
 		lights[1]->update(camera->direction(), camera->position());
@@ -861,7 +755,7 @@ void Scene::cleanupPhysics()
 	printf("PhysX done.\n");
 }
 
-void Scene::applyPhysXTransform()
+void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 {
 	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
 	physx::PxActor** actors = new physx::PxActor * [numActors];
@@ -923,7 +817,148 @@ void Scene::applyPhysXTransform()
 	{
 		this->drawable_object[1].getModel()->applyPhysxTransf(openMatrix, i);
 		this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		this->drawable_object[1].getModel()->Pos_mov(glm::vec3(0.0f, -1.6f, 0.0f));
+		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(0.0f, -1.6f, 0.0f));
+	}
+	//camera->setCamera(openMatrix);
+	camera->setPosition(openMatrix[3]);
+	camera->update(delta);
+
+	// Call the move method on the controller
+	physx::PxControllerCollisionFlags collisionFlags;
+	physx::PxVec3 movement(0.0f, 0.0f, 0.0f);
+	physx::PxControllerState controllerState;
+	gController->getState(controllerState);
+	controllerState.deltaXP.y += gravity.y * delta;
+	physx::PxVec3 forwardDir(0.0f, 0.0f, 0.0f);
+
+	// Add the resulting vector to the character controller's position to move it in the desired direction
+	glm::vec3 cameraForward = camera->direction();
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	switch (this->drawable_object[1].getModel()->moved) // HACK: natvrdo pozice modelu
+	{
+	case 0:
+		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	case 1:
+		//movement = physx::PxVec3(0.0f, 0.0f, 1.0f) + controllerState.deltaXP; // move one unit forward
+		forwardDir = physx::PxVec3(camera->view()[2].x, camera->view()[2].y, -camera->view()[2].z); // Extract the forward direction vector from the view matrix
+		//forwardDir.normalize(); // Normalize the vector to ensure it has unit length
+		//forwardDir *= delta; // Scale the vector by your desired speed
+		movement = forwardDir + controllerState.deltaXP;
+		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	case 2:
+		//movement = physx::PxVec3(0.0f, 0.0f, -1.0f) + controllerState.deltaXP; // move one unit backward
+		forwardDir = physx::PxVec3(-camera->view()[2].x, camera->view()[2].y, camera->view()[2].z);
+		movement = forwardDir + controllerState.deltaXP;
+		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	case 3:
+		//movement = physx::PxVec3(1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit left
+		glm::vec3 cameraLeft = glm::normalize(glm::cross(cameraForward, cameraUp));
+		movement = physx::PxVec3(-cameraLeft.x, cameraLeft.y, -cameraLeft.z) + controllerState.deltaXP; // move one unit sideways to the left
+		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	case 4:
+		//movement = physx::PxVec3(-1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit right
+		glm::vec3 cameraRight = glm::normalize(glm::cross(cameraForward, cameraUp));
+		movement = physx::PxVec3(cameraRight.x, cameraRight.y, cameraRight.z) + controllerState.deltaXP; // move one unit sideways to the left
+		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	default:
+		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
+		break;
+	}
+	//drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	if (this->drawable_object[1].getModel()->moved != this->drawable_object[1].getModel()->last_moved && this->drawable_object[1].getModel()->moved != 0) // HACK: natvrdo pozice modelu
+	{
+		//TODO tohle nefunguje, kdovi proc
+		switch (this->drawable_object[1].getModel()->moved)
+		{
+		case 1:
+			switch (this->drawable_object[1].getModel()->last_moved)
+			{
+			case 2:
+				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 3:
+				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 4:
+				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			default:
+				break;
+			}
+			break;
+		case 2:
+			switch (this->drawable_object[1].getModel()->last_moved)
+			{
+			case 1:
+				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 3:
+				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 4:
+				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			default:
+				break;
+			}
+			break;
+		case 3:
+			switch (this->drawable_object[1].getModel()->last_moved)
+			{
+			case 1:
+				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 2:
+				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 4:
+				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			default:
+				break;
+			}
+			break;
+		case 4:
+			switch (this->drawable_object[1].getModel()->last_moved)
+			{
+			case 1:
+				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 2:
+				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			case 3:
+				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+		this->drawable_object[1].getModel()->last_moved = drawable_object[1].getModel()->moved;
+	}
+
+	this->drawable_object[1].getModel()->moved = 0; // HACK: natvrdo pozice modelu
+
+	if (this->drawable_object[1].getModel()->shot) // HACK: natvrdo pozice modelu
+	{
+		//shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), gController->getActor()->getGlobalPose().rotate(physx::PxVec3(0, 0, -1)) * 200);
+		
+		physx::PxMat44 matrix = physx::PxMat44(
+			physx::PxVec3(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z),
+			physx::PxVec3(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z),
+			physx::PxVec3(camera->view()[2].x, camera->view()[2].y,	camera->view()[2].z),
+			physx::PxVec3(camera->view()[3].x, camera->view()[3].y,	camera->view()[3].z));
+		physx::PxTransform* trans = new physx::PxTransform(matrix);
+		shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), trans->rotate(physx::PxVec3(0, 0, -1))); // TODO: vychatat smer strelby
+		this->drawable_object[1].getModel()->shot = false;  // HACK: natvrdo pozice modelu
 	}
 	//}
 
@@ -984,6 +1019,15 @@ void Scene::applyPhysXStatic()
 	}
 	// Release memory for actors array
 	delete[] actors;
+}
+
+physx::PxRigidDynamic* Scene::shootBall(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
+{
+	physx::PxRigidDynamic* dynamic = physx::PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
+	dynamic->setAngularDamping(0.5f);
+	dynamic->setLinearVelocity(velocity);
+	gScene->addActor(*dynamic);
+	return dynamic;
 }
 
 void Scene::createForest()

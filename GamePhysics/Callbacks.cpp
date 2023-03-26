@@ -78,19 +78,19 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
             Callbacks::flashlight->setCutoff(9.f);
         break;
     case GLFW_KEY_UP:
-        drawableObj[1].getModel()->moved = 1;
+        drawableObj[1].getModel()->moved = 1; //HACK: hardtype actora
         //camera->rotateVer((action == GLFW_RELEASE) ? Direction::none : Direction::up);
         break;
     case GLFW_KEY_DOWN:
-        drawableObj[1].getModel()->moved = 2;
+        drawableObj[1].getModel()->moved = 2; //HACK: hardtype actora
         //camera->rotateVer((action == GLFW_RELEASE) ? Direction::none : Direction::down);
         break;
     case GLFW_KEY_LEFT:
-        drawableObj[1].getModel()->moved = 3;
+        drawableObj[1].getModel()->moved = 3; //HACK: hardtype actora
         //camera->rotateHor((action == GLFW_RELEASE) ? Direction::none : Direction::left);
         break;
     case GLFW_KEY_RIGHT:
-        drawableObj[1].getModel()->moved = 4;
+        drawableObj[1].getModel()->moved = 4; //HACK: hardtype actora
         //camera->rotateHor((action == GLFW_RELEASE) ? Direction::none : Direction::right);
         break;
     case GLFW_KEY_U:
@@ -116,6 +116,9 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         {
             drawableObj[model_id].getModel()->setGrow((action == GLFW_RELEASE) ? Growth::none : Growth::shrink);
         }
+        break;
+    case GLFW_KEY_SPACE:
+        drawableObj[1].getModel()->shot = true; //HACK: hardtype actora
         break;
     case GLFW_KEY_DELETE:
         if (model_id > 1)
