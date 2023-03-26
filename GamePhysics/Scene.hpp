@@ -62,6 +62,7 @@ private:
 	physx::PxController* gController = NULL;
 
 	std::unordered_map<physx::PxActor*, int> actorID;
+	int num_balls = 50;
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);

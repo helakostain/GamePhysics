@@ -447,10 +447,10 @@ void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::P
 	gControllerManager = PxCreateControllerManager(*gScene);
 	gControllerManager->setOverlapRecoveryModule(true); //fixes actors on initial possition to not fall through ground etc
 	physx::PxCapsuleControllerDesc controllerDesc;
-	//controllerDesc.height = 1.8f;
-	controllerDesc.height = height;
-	//controllerDesc.radius = 0.5f;
-	controllerDesc.radius = radius / 2;
+	controllerDesc.height = 3.0f;
+	//controllerDesc.height = height;
+	controllerDesc.radius = 1.0f;
+	//controllerDesc.radius = radius / 2;
 	controllerDesc.position = physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z);
 	//controllerDesc.upDirection = physx::PxVec3(0.0f, -1.0f, 0.0f); // Set the up direction to simulate gravity acting in the negative Y direction
 	controllerDesc.material = gMaterial;
@@ -820,7 +820,8 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(0.0f, -1.6f, 0.0f));
 	}
 	//camera->setCamera(openMatrix);
-	camera->setPosition(openMatrix[3]);
+	openMatrix[3].y = openMatrix[3].y + 1.0f;
+	camera->setPosition(openMatrix[3]); // this moves camera to position of character controller
 	camera->update(delta);
 
 	// Call the move method on the controller
@@ -949,15 +950,42 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 
 	if (this->drawable_object[1].getModel()->shot) // HACK: natvrdo pozice modelu
 	{
-		//shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), gController->getActor()->getGlobalPose().rotate(physx::PxVec3(0, 0, -1)) * 200);
+		//shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), gController->getActor()->getGlobalPose().rotate(physx::PxVec3(camera->direction().x, camera->direction().y, camera->direction().z))*10);
+		/*glm::vec3 cameraDir = camera->direction();
+		glm::mat4 cameraRotMat = glm::lookAt(glm::vec3(0.0f), -cameraDir, glm::vec3(0.0f, 1.0f, 0.0f));
+		physx::PxVec3 physxDir = physx::PxVec3(cameraRotMat[2][0], cameraRotMat[2][1], cameraRotMat[2][2]);
+		physx::PxVec3 velocity = physxDir * 10.0f;
+		physx::PxMat44 matri = physx::PxMat44(
+			physx::PxVec4(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z, camera->view()[0].w),
+			physx::PxVec4(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z, camera->view()[1].w),
+			physx::PxVec4(camera->view()[2].x, camera->view()[2].y, camera->view()[3].z, camera->view()[2].w),
+			physx::PxVec4(camera->view()[3].x, camera->view()[3].y, camera->view()[3].z, camera->view()[3].w)
+		);
+		physx::PxTransform camTram = physx::PxTransform(matri);
 		
 		physx::PxMat44 matrix = physx::PxMat44(
 			physx::PxVec3(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z),
 			physx::PxVec3(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z),
-			physx::PxVec3(camera->view()[2].x, camera->view()[2].y,	camera->view()[2].z),
-			physx::PxVec3(camera->view()[3].x, camera->view()[3].y,	camera->view()[3].z));
-		physx::PxTransform* trans = new physx::PxTransform(matrix);
-		shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), trans->rotate(physx::PxVec3(0, 0, -1))); // TODO: vychatat smer strelby
+			physx::PxVec3(camera->view()[2].x, camera->view()[2].y, camera->view()[2].z),
+			physx::PxVec3(camera->view()[3].x, camera->view()[3].y, camera->view()[3].z));
+		physx::PxTransform trans = physx::PxTransform(matrix);
+		trans.p.y += 3.0f;
+		shootBall(trans, physx::PxSphereGeometry(1.0f), matrix.rotate(physx::PxVec3(0, 0, -1)) * 10);
+		*/
+		physx::PxVec3 pxCameraPos(camera->position().x, camera->position().y, camera->position().z);
+		physx::PxVec3 pxCameraDir(camera->direction().x, camera->direction().y, camera->direction().z);
+		float sphereRadius = 1.0f; // Set the radius of the sphere.
+		physx::PxVec3 spherePos = pxCameraPos + (pxCameraDir * (sphereRadius + 1.0f)); // Add 1 unit to avoid collision with the camera.
+		physx::PxTransform sphereTransform(spherePos);
+		float sphereSpeed = 10.0f; // Set the speed of the sphere.
+		physx::PxVec3 sphereVelocity = pxCameraDir * sphereSpeed;
+		physx::PxSphereGeometry sphereGeometry(sphereRadius);
+		physx::PxRigidDynamic* new_ball = shootBall(sphereTransform, sphereGeometry, sphereVelocity);
+		//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+		//TODO: crash na meshID pri vlozeni ball do draw_obj
+		//actorID[new_ball] = num_balls;
+		//num_balls++;
+		//drawable_object.back().getModel()->actorIDs.push_back(num_balls);
 		this->drawable_object[1].getModel()->shot = false;  // HACK: natvrdo pozice modelu
 	}
 	//}
@@ -1023,7 +1051,20 @@ void Scene::applyPhysXStatic()
 
 physx::PxRigidDynamic* Scene::shootBall(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
 {
+	/*
 	physx::PxRigidDynamic* dynamic = physx::PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
+	dynamic->setAngularDamping(0.5f);
+	dynamic->setLinearVelocity(velocity);
+	gScene->addActor(*dynamic);
+	return dynamic;
+	*/
+	physx::PxRigidDynamic* dynamic = gPhysics->createRigidDynamic(t);
+	physx::PxShape* meshShape;
+	meshShape = gPhysics->createShape(geometry, *gMaterial, true);
+	meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+	meshShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
+	dynamic->attachShape(*meshShape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*dynamic, 1.6f);
 	dynamic->setAngularDamping(0.5f);
 	dynamic->setLinearVelocity(velocity);
 	gScene->addActor(*dynamic);
