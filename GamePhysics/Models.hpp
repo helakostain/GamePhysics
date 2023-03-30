@@ -42,6 +42,8 @@ protected:
 public:
 	Models();
 	Models(const float in_points[], int size_points);
+	Models(Models& models) noexcept;
+	//Models(Models&& models) noexcept;
 
 	virtual void Init();
 	virtual void Init(int valuesInRow, int skip, int values);
@@ -79,4 +81,5 @@ public:
 	int moved = 0; // 1 = forward, 2 = back, 3 = left, 4 = right
 	int last_moved = 3; // 1 = forward, 2 = back, 3 = left, 4 = right
 	bool shot = false;
+	bool isBall = false;
 };

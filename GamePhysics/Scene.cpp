@@ -101,11 +101,11 @@ void Scene::initAndEmplace(std::shared_ptr<ColoredLight>& light)
 void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::Light type)
 {
 	std::shared_ptr<ColoredLight> light = createLight(color, pos, type);
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(pos);
-	this->drawable_object.back().getModel()->Pos_mov(pos);
+	//this->drawable_object.back().getModel()->Pos_mov(pos);
 	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
+	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
 	//this->drawable_object.back().Pos_scale(0.25);
 	initAndEmplace(light);
 	applyLights();
@@ -114,11 +114,11 @@ void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::L
 void Scene::emplaceLight(glm::vec3 color, glm::vec3 pos, glm::vec3 dir, float cutoff)
 {
 	std::shared_ptr<ColoredLight> light = std::make_shared<Spotlight>(color, pos, dir, cutoff);
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	//this->drawable_object.back().Pos_mov(pos);
-	this->drawable_object.back().getModel()->Pos_mov(pos);
+	//this->drawable_object.back().getModel()->Pos_mov(pos);
 	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
+	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
 	initAndEmplace(light);
 	applyLights();
 }
@@ -588,6 +588,7 @@ void Scene::createConvexMeshes(int i, int j)
 		gScene->addActor(*meshActor);
 
 		actorID[meshActor] = i;
+		this->num_balls = i;
 		drawable_object[j].getModel()->actorIDs.push_back(i);
 
 		//TODO: zrychlit!, pridat aby ground byl static a ne dynamic actor, zaridit aby se to tak nerozbijelo, mrknout na github linky v onenotu
@@ -788,6 +789,19 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				}
 				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
 				{
+					if (j >= 13)
+					{
+						/*
+						std::cout << "actorID map:\n";
+						for (const auto& elem : actorID)
+						{
+							std::cout << elem.first << " " << elem.second << "\n";
+						}
+						std::cout << "model actorID:\n";
+						for (auto i : drawable_object[j].getModel()->actorIDs)
+							std::cout << "draw_obj: " << j << " actorID: " << i << std::endl;
+							*/
+					}
 					if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
 					{
 						meshID = foundID;
@@ -799,6 +813,11 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
 			//std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;	
+			/*
+			if (meshID == 16)
+			{
+				std::cout << "break\n";
+			}*/
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
 			
 			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
@@ -962,7 +981,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 			physx::PxVec4(camera->view()[3].x, camera->view()[3].y, camera->view()[3].z, camera->view()[3].w)
 		);
 		physx::PxTransform camTram = physx::PxTransform(matri);
-		
+
 		physx::PxMat44 matrix = physx::PxMat44(
 			physx::PxVec3(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z),
 			physx::PxVec3(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z),
@@ -981,11 +1000,26 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		physx::PxVec3 sphereVelocity = pxCameraDir * sphereSpeed;
 		physx::PxSphereGeometry sphereGeometry(sphereRadius);
 		physx::PxRigidDynamic* new_ball = shootBall(sphereTransform, sphereGeometry, sphereVelocity);
-		//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-		//TODO: crash na meshID pri vlozeni ball do draw_obj
-		//actorID[new_ball] = num_balls;
-		//num_balls++;
-		//drawable_object.back().getModel()->actorIDs.push_back(num_balls);
+		if (ball_exist)
+		{
+			for (int k = 0; k < drawable_object.size(); k++)
+			{
+				if (drawable_object[k].getModel()->isBall)
+				{
+					this->drawable_object.emplace_back(DrawableObject( new Models(*drawable_object[k].getModel()), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+					
+				}
+			}
+		}
+		else
+		{
+			this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+			this->ball_exist = true;
+		}
+		num_balls++;
+		actorID[new_ball] = num_balls;
+		drawable_object.back().getModel()->actorIDs.push_back(num_balls);
+		drawable_object.back().getModel()->isBall = true;
 		this->drawable_object[1].getModel()->shot = false;  // HACK: natvrdo pozice modelu
 	}
 	//}

@@ -118,7 +118,7 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         }
         break;
     case GLFW_KEY_SPACE:
-        drawableObj[1].getModel()->shot = true; //HACK: hardtype actora
+        drawableObj[1].getModel()->shot = ((action == GLFW_RELEASE) ? true : false); //HACK: hardtype actora
         break;
     case GLFW_KEY_DELETE:
         if (model_id > 1)

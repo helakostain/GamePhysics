@@ -40,6 +40,9 @@ class Mesh
 public:
     Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const Material& material);
     Mesh(Mesh&& mesh) noexcept;
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+    Mesh& operator=(Mesh&&) = default;
 
     std::vector<Vertex> vertices;
     std::vector<physx::PxVec3> gVertices;
