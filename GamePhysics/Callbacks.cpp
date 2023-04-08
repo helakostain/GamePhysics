@@ -18,8 +18,6 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
     if (key == GLFW_KEY_ESCAPE and action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
-    //physx::PxVec3 movementVec;
-    //physx::PxControllerCollisionFlags collisionFlags;
     int characterNum = 1;
     for (int i = 0; i < drawableObj.size(); i++)
     {
@@ -56,27 +54,18 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         }
         break;
     case GLFW_KEY_W:
-        //model_id 2
-        //movementVec = physx::PxVec3(0.0f, 0.0f, 1.0f);
-        //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
         drawableObj[characterNum].getModel()->moved = 1;
         //camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::up);
         break;
     case GLFW_KEY_S:
-        //movementVec = physx::PxVec3(0.0f, 0.0f, -1.0f);
-        //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
         drawableObj[characterNum].getModel()->moved = 2;
         //camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::down);
         break;
     case GLFW_KEY_A:
-        //movementVec = physx::PxVec3(-1.0f, 0.0f, 0.0f);
-        //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
         drawableObj[characterNum].getModel()->moved = 3;
         //camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::left);
         break;
     case GLFW_KEY_D:
-        //movementVec = physx::PxVec3(1.0f, 0.0f, 0.0f);
-        //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
         drawableObj[characterNum].getModel()->moved = 4;
         //camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::right);
         break;
@@ -128,20 +117,6 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         break;
     case GLFW_KEY_SPACE:
         drawableObj[characterNum].getModel()->shot = ((action == GLFW_RELEASE) ? true : false); 
-        break;
-    case GLFW_KEY_DELETE:
-        if (model_id > 1)
-        {
-            /*auto iter = std::find_if(drawableObj.begin(), drawableObj.end(),
-                [&](DrawableObject& p) {return p.getId() == drawableObj[model_id].getId(); });
-
-            // if found, erase it
-            if (iter != drawableObj.end())
-                drawableObj.erase(iter);*/
-                /*drawableObj.erase(std::next(drawableObj.begin(), model_id - 1), std::next(drawableObj.begin(), model_id + 1));
-                updateObjects(drawableObj);*/
-                //MAYBE ONE DAY
-        }
         break;
     default:
         break;
@@ -242,9 +217,3 @@ void Callbacks::updateObjects(std::vector<DrawableObject>& dObjects)
 {
     drawableObj = dObjects;
 }
-/*
-void Callbacks::updateCharacter(physx::PxController* cont)
-{
-    controller = cont;
-}
-*/

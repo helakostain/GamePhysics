@@ -8,9 +8,7 @@ DrawableObject::DrawableObject(Models* model, const char* vertex_path, const cha
 {
     this->models = model;
     this->models->Init();
-    //this->shaders = new Shader(vertex_path, fragment_path);
     this->getModel()->setShader(new Shader(vertex_path, fragment_path));
-    //this->transformations = new Transformation();
     this->isObject = false;
     this->id = size;
     this->size_points = model->get_size_points();
@@ -20,9 +18,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, int size)
 {
     this->models = model;
     this->models->Init();
-    //this->shaders = &shader;
     this->getModel()->setShader(&shader);
-    //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
     this->id = size;
@@ -33,9 +29,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Movemen
 {
     this->models = model;
     this->models->Init();
-    //this->shaders = &shader;
     this->getModel()->setShader(&shader);
-    //this->transformations = new Transformation();
     this->texture = nullptr;
     this->isObject = false;
     this->id = size;
@@ -47,9 +41,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 {
     this->models = model;
     this->models->Init();
-    //this->shaders = &shader;
     this->getModel()->setShader(&shader);
-    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = false;
     this->id = size;
@@ -59,9 +51,7 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture> texture, int size, bool object, int actorType)
 {
     this->models = model;
-    //this->shaders = &shader;
     this->getModel()->setShader(&shader);
-    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
     this->id = size;
@@ -73,70 +63,27 @@ DrawableObject::DrawableObject(Models* model, Shader& shader, shared_ptr<Texture
 {
     this->movementCalculator = movement;
     this->models = model;
-    //this->shaders = &shader;
     this->getModel()->setShader(&shader);
-    //this->transformations = new Transformation();
     this->texture = texture;
     this->isObject = object;
     this->id = size;
     this->size_points = model->get_size_points();
 }
-/*
-void DrawableObject::DoTransformations(const double delta)
-{
-    this->transformations->Update(delta);
-}
-*/
 void DrawableObject::sendShaderMatrix(int i)
 {
-    //this->shaders->setMatrix(this->transformations->matrix());
-    //for (int i = 0; i < this->getModel()->meshes.size(); i++)
-    //{
-        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
-        this->getModel()->shaders[i]->setMatrix(this->getModel()->getTransformation(i)->matrix());
-    //}
+    this->getModel()->shaders[i]->setMatrix(this->getModel()->getTransformation(i)->matrix());
 }
 
 bool DrawableObject::SetUp()
 {
-    //this->shaders->Init();
     for (int i = 0; i < this->getModel()->meshes.size(); i++)
     {
-        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
         this->getModel()->shaders[i]->Init();
     }
     this->models->Bind();
     return true;
 }
-/*
-void DrawableObject::Pos_scale(float a)
-{
-    this->transformations->scale(a);
-}
 
-void DrawableObject::setFy(Direction dir)
-{
-    this->transformations->applyFy(dir);
-}
-void DrawableObject::setFx(Direction dir)
-{
-    this->transformations->applyFx(dir);
-}
-void DrawableObject::setRot(Rotation r)
-{
-    this->transformations->setRotation(r);
-}
-void DrawableObject::setGrow(Growth g)
-{
-    this->transformations->setGrowth(g);
-}
-
-void DrawableObject::Pos_mov(glm::vec3 a)
-{
-    this->currPosition = a;
-    this->transformations->translate(a);
-}
-*/
 void DrawableObject::Draw()
 {
     this->models->Draw();
@@ -144,10 +91,8 @@ void DrawableObject::Draw()
 
 void DrawableObject::updateObject(const float delta)
 {
-    //this->shaders->shaderUseProgram();
     for (int i = 0; i < this->getModel()->meshes.size(); i++)
     {
-        //this->shaders->setMatrix(this->getModel()->getTransformation(i)->matrix());
         this->getModel()->shaders[i]->shaderUseProgram();
 
         if (!isObject)
@@ -156,23 +101,18 @@ void DrawableObject::updateObject(const float delta)
             glStencilFunc(GL_ALWAYS, id + 1, 0xFF);
         }
         this->models->DoTransformations(delta, i);
-        //transformations->Update(delta);
         if (movementCalculator != nullptr)
             this->updateMovement(delta); //NEFUNKCNI rozbije physx
         sendShaderMatrix(i);
 
         if (this->texture != nullptr)
         {
-            //this->texture->bind(this->shaders);
-
             this->texture->bind(this->getModel()->shaders[i]);
 
         }
 
         if (isObject)
         {
-            //models->draw(id + 1, this->shaders);
-
             models->draw(id + 1, i);
 
         }
@@ -186,23 +126,14 @@ void DrawableObject::updateObject(const float delta)
 void DrawableObject::applyTexture(std::shared_ptr<Texture> texture)
 {
 }
-/*
-void DrawableObject::rotate(float degree, glm::vec3 axis)
-{
-    this->transformations->rotate(degree, axis);
-}
-*/
+
 void DrawableObject::updateMovement(double delta)
 {
     movementCalculator->update(delta);
     this->models->setPos(movementCalculator->currentPosition());
-    //transformations->setPosition(movementCalculator->currentPosition());
     this->models->rotate(movementCalculator->currentHeading().x, glm::vec3(1, 0, 0));
-    //transformations->rotate(movementCalculator->currentHeading().x, glm::vec3(1, 0, 0));
     this->models->rotate(movementCalculator->currentHeading().y, glm::vec3(0, 1, 0));
-    //transformations->rotate(movementCalculator->currentHeading().y, glm::vec3(0, 1, 0));
     this->models->rotate(movementCalculator->currentHeading().z, glm::vec3(0, 0, 1));
-    //transformations->rotate(movementCalculator->currentHeading().z, glm::vec3(0, 0, 1));
 }
 
 int DrawableObject::getId()
@@ -224,10 +155,3 @@ int DrawableObject::getActorType()
 {
     return this->actorType;
 }
-
-/*
-Transformation* DrawableObject::getTransformation()
-{
-    return this->transformations;
-}
-*/

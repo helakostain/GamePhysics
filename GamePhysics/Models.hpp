@@ -35,7 +35,6 @@ protected:
 	GLuint VBO;
 	GLuint VAO;
 
-	//Transformation* transformations;
 	std::vector<Transformation*> transformations;
 	
 	Shader* shader;
@@ -43,7 +42,6 @@ public:
 	Models();
 	Models(const float in_points[], int size_points);
 	Models(Models& models) noexcept;
-	//Models(Models&& models) noexcept;
 
 	virtual void Init();
 	virtual void Init(int valuesInRow, int skip, int values);

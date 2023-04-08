@@ -32,8 +32,6 @@ void Scene::Loop()
 	ambientLight.apply();
 	applyLights();
 
-	//applyPhysXStatic();
-
 	const physx::PxVec3 gravity(0, -9.81f, 0); // -9.81 m/s^2 in the negative Y direction
 
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
@@ -53,7 +51,6 @@ void Scene::Loop()
 
 		//physx part
 		applyPhysXTransform(delta, gravity);
-		//stepPhysics();
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
@@ -101,12 +98,6 @@ void Scene::initAndEmplace(std::shared_ptr<ColoredLight>& light)
 void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::Light type)
 {
 	std::shared_ptr<ColoredLight> light = createLight(color, pos, type);
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	//this->drawable_object.back().Pos_mov(pos);
-	//this->drawable_object.back().getModel()->Pos_mov(pos);
-	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
-	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, (0.1 * (pos.z / abs(pos.z)))));
-	//this->drawable_object.back().Pos_scale(0.25);
 	initAndEmplace(light);
 	applyLights();
 }
@@ -114,11 +105,6 @@ void Scene::emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::L
 void Scene::emplaceLight(glm::vec3 color, glm::vec3 pos, glm::vec3 dir, float cutoff)
 {
 	std::shared_ptr<ColoredLight> light = std::make_shared<Spotlight>(color, pos, dir, cutoff);
-	//this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::constant(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	//this->drawable_object.back().Pos_mov(pos);
-	//this->drawable_object.back().getModel()->Pos_mov(pos);
-	//this->drawable_object.back().Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
-	//this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.f, 0.f, 0.1f));
 	initAndEmplace(light);
 	applyLights();
 }
@@ -163,9 +149,7 @@ void Scene::placeModel(const int mouseX, const int mouseY)
 		auto pos = glm::unProject(screenX, camera->view(), camera->project(), viewport);
 		pos.y = 0;
 		this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree", "Textures/tree.png"), drawable_object.size(), true, 0));
-		//drawable_object.back().Pos_mov(pos);
 		drawable_object.back().getModel()->Pos_mov(pos);
-		//drawable_object.back().Pos_scale(0.3f);
 		drawable_object.back().getModel()->Pos_scale(0.3f);
 		Callbacks::updateObjects(std::ref(drawable_object));
 	}
@@ -307,12 +291,9 @@ void Scene::createTriangleMeshes(int i, int j)
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
 	// are valid, so we perform a validation check in debug/checked builds.
 	physx::PxU32 numVertices = drawable_object[j].getModel()->meshes[i].gVertices.size();
-	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
 	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
-	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
 	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
 	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
-	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
 	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 
 	physx::PxTriangleMeshDesc meshDesc;
@@ -416,21 +397,9 @@ void Scene::createTriangleMeshes(int i, int j)
 						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
 						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
 		meshActor->setGlobalPose(physx::PxTransform(matrix));
-		//gScene->addActor(*meshActor);
 		actorID[meshActor] = i;
 		drawable_object[j].getModel()->actorIDs.push_back(i);
 		drawable_object[j].getModel()->isCharacter = true;
-
-		/*
-		//this moves the actors
-		physx::PxTransform currentPose = meshActor->getGlobalPose();
-		physx::PxVec3 newVelocity = physx::PxVec3(10.0f, 0.0f, 0.0f); // Set the new velocity to (1, 0, 0)
-
-		// Set the target pose to the current pose with the new velocity
-		physx::PxTransform newPose(currentPose.p, currentPose.q);
-		newPose.p += newVelocity * (1.0f / 60.0f); // Multiply velocity by timeStep to get the position change
-		meshActor->setKinematicTarget(newPose);
-		*/
 
 		createCharacter(i, j, meshActor, meshShape); // TODO pro vice meshu nez jeden je potreba presunout ven!
 	}
@@ -449,23 +418,16 @@ void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::P
 	gControllerManager->setOverlapRecoveryModule(true); //fixes actors on initial possition to not fall through ground etc
 	physx::PxCapsuleControllerDesc controllerDesc;
 	controllerDesc.height = 3.0f;
-	//controllerDesc.height = height;
 	controllerDesc.radius = 1.0f;
-	//controllerDesc.radius = radius / 2;
 	controllerDesc.position = physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z);
-	//controllerDesc.upDirection = physx::PxVec3(0.0f, -1.0f, 0.0f); // Set the up direction to simulate gravity acting in the negative Y direction
 	controllerDesc.material = gMaterial;
 	controllerDesc.slopeLimit = 0.5f;
 	controllerDesc.contactOffset = 0.1f;
 	controllerDesc.stepOffset = 0.2f;
-	//create callback:
-	//MyControllerCallback* controllerCallback = new MyControllerCallback();
-	//controllerDesc.reportCallback = controllerCallback; maybe to handle hits
+
 	gController = gControllerManager->createController(controllerDesc);
-	//controller->setUserData(controllerCallback);
 	gController->setUserData(actor);
 	gController->setFootPosition(physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z));
-	//Callbacks::updateCharacter(std::ref(gController));
 }
 
 void Scene::createConvexMeshes(int i, int j)
@@ -477,12 +439,9 @@ void Scene::createConvexMeshes(int i, int j)
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
 	// are valid, so we perform a validation check in debug/checked builds.
 	physx::PxU32 numVertices = drawable_object[j].getModel()->meshes[i].gVertices.size();
-	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
 	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
-	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
 	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
 	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
-	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
 	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 
 	physx::PxTriangleMeshDesc meshDesc;
@@ -570,8 +529,7 @@ void Scene::createConvexMeshes(int i, int j)
 		}
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
 		meshShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
-		//meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
-
+		
 		meshActor->attachShape(*meshShape);
 		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
 			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
@@ -583,7 +541,6 @@ void Scene::createConvexMeshes(int i, int j)
 						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
 						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
 		meshActor->setGlobalPose(physx::PxTransform(matrix));
-		//meshActor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
 		
 		physx::PxRigidBodyExt::updateMassAndInertia(*meshActor, 1.6f);
 		gScene->addActor(*meshActor);
@@ -618,12 +575,9 @@ void Scene::createStaticActor(int i, int j)
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
 	// are valid, so we perform a validation check in debug/checked builds.
 	physx::PxU32 numVertices = drawable_object[j].getModel()->meshes[i].gVertices.size();
-	//const physx::PxVec3* vertices = new physx::PxVec3(drawable_object.front().getModel()->meshes[i].vertices[0].position.x, drawable_object.front().getModel()->meshes[i].vertices[0].position.y, drawable_object.front().getModel()->meshes[i].vertices[0].position.z);
 	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
-	//const physx::PxVec3* vertices = std::move(drawable_object.front().getModel()->meshes[i].gVertices);
 	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
 	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
-	//createBV34TriangleMesh(numVertices, vertices, numTriangles, indices, true, false, true, 15);
 	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 
 	physx::PxTriangleMeshDesc meshDesc;
@@ -692,8 +646,7 @@ void Scene::createStaticActor(int i, int j)
 		triGeom.triangleMesh = triMesh;
 		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
 		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
-		//meshShape->setLocalPose(physx::PxTransform(physx::PxVec3(drawable_object[j].getModel()->currPosition.x, drawable_object[j].getModel()->currPosition.y, drawable_object[j].getModel()->currPosition.z)));
-
+		
 		meshActor->attachShape(*meshShape);
 		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
 			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
@@ -765,8 +718,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	// Iterate through actors and get their position
 	for (physx::PxU32 i = 0; i < numActors; i++)
 	{
-	//if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
-	//{
 		if (auto found = actorID.find(actors[i]); found != actorID.end())
 		{
 			int foundID = actorID[actors[i]];
@@ -793,19 +744,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				}
 				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
 				{
-					if (j >= 13)
-					{
-						/*
-						std::cout << "actorID map:\n";
-						for (const auto& elem : actorID)
-						{
-							std::cout << elem.first << " " << elem.second << "\n";
-						}
-						std::cout << "model actorID:\n";
-						for (auto i : drawable_object[j].getModel()->actorIDs)
-							std::cout << "draw_obj: " << j << " actorID: " << i << std::endl;
-							*/
-					}
 					if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
 					{
 						meshID = foundID;
@@ -823,10 +761,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				std::cout << "break\n";
 			}*/
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
-			
-			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
-
-			//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
 		}
 	}
 	//move character
@@ -836,14 +770,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	physx::PxVec3 actorPosition = actorTransform.p;
 
 	glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
-	/*
-	for (int i = 0; i < this->drawable_object[characterNum].getModel()->meshes.size(); i++)
-	{
-		this->drawable_object[1].getModel()->applyPhysxTransf(openMatrix, i);
-		this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(0.0f, -1.6f, 0.0f));
-	}*/
-	//camera->setCamera(openMatrix);
+
 	openMatrix[3].y = openMatrix[3].y + 1.0f;
 	camera->setPosition(openMatrix[3]); // this moves camera to position of character controller
 	camera->update(delta);
@@ -865,27 +792,21 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 1:
-		//movement = physx::PxVec3(0.0f, 0.0f, 1.0f) + controllerState.deltaXP; // move one unit forward
 		forwardDir = physx::PxVec3(camera->view()[2].x, camera->view()[2].y, -camera->view()[2].z); // Extract the forward direction vector from the view matrix
-		//forwardDir.normalize(); // Normalize the vector to ensure it has unit length
-		//forwardDir *= delta; // Scale the vector by your desired speed
 		movement = forwardDir + controllerState.deltaXP;
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 2:
-		//movement = physx::PxVec3(0.0f, 0.0f, -1.0f) + controllerState.deltaXP; // move one unit backward
 		forwardDir = physx::PxVec3(-camera->view()[2].x, camera->view()[2].y, camera->view()[2].z);
 		movement = forwardDir + controllerState.deltaXP;
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 3:
-		//movement = physx::PxVec3(1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit left
 		glm::vec3 cameraLeft = glm::normalize(glm::cross(cameraForward, cameraUp));
 		movement = physx::PxVec3(-cameraLeft.x, cameraLeft.y, -cameraLeft.z) + controllerState.deltaXP; // move one unit sideways to the left
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 4:
-		//movement = physx::PxVec3(-1.0f, 0.0f, 0.0f) + controllerState.deltaXP; // move one unit right
 		glm::vec3 cameraRight = glm::normalize(glm::cross(cameraForward, cameraUp));
 		movement = physx::PxVec3(cameraRight.x, cameraRight.y, cameraRight.z) + controllerState.deltaXP; // move one unit sideways to the left
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
@@ -894,7 +815,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	}
-	//drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	if (this->drawable_object[characterNum].getModel()->moved != this->drawable_object[characterNum].getModel()->last_moved && this->drawable_object[characterNum].getModel()->moved != 0)
 	{
 		//TODO tohle nefunguje, kdovi proc
@@ -974,28 +894,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 
 	if (this->drawable_object[characterNum].getModel()->shot)
 	{
-		//shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), gController->getActor()->getGlobalPose().rotate(physx::PxVec3(camera->direction().x, camera->direction().y, camera->direction().z))*10);
-		/*glm::vec3 cameraDir = camera->direction();
-		glm::mat4 cameraRotMat = glm::lookAt(glm::vec3(0.0f), -cameraDir, glm::vec3(0.0f, 1.0f, 0.0f));
-		physx::PxVec3 physxDir = physx::PxVec3(cameraRotMat[2][0], cameraRotMat[2][1], cameraRotMat[2][2]);
-		physx::PxVec3 velocity = physxDir * 10.0f;
-		physx::PxMat44 matri = physx::PxMat44(
-			physx::PxVec4(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z, camera->view()[0].w),
-			physx::PxVec4(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z, camera->view()[1].w),
-			physx::PxVec4(camera->view()[2].x, camera->view()[2].y, camera->view()[3].z, camera->view()[2].w),
-			physx::PxVec4(camera->view()[3].x, camera->view()[3].y, camera->view()[3].z, camera->view()[3].w)
-		);
-		physx::PxTransform camTram = physx::PxTransform(matri);
-
-		physx::PxMat44 matrix = physx::PxMat44(
-			physx::PxVec3(camera->view()[0].x, camera->view()[0].y, camera->view()[0].z),
-			physx::PxVec3(camera->view()[1].x, camera->view()[1].y, camera->view()[1].z),
-			physx::PxVec3(camera->view()[2].x, camera->view()[2].y, camera->view()[2].z),
-			physx::PxVec3(camera->view()[3].x, camera->view()[3].y, camera->view()[3].z));
-		physx::PxTransform trans = physx::PxTransform(matrix);
-		trans.p.y += 3.0f;
-		shootBall(trans, physx::PxSphereGeometry(1.0f), matrix.rotate(physx::PxVec3(0, 0, -1)) * 10);
-		*/
 		physx::PxVec3 pxCameraPos(camera->position().x, camera->position().y, camera->position().z);
 		physx::PxVec3 pxCameraDir(camera->direction().x, camera->direction().y, camera->direction().z);
 		float sphereRadius = 0.95f; // Set the radius of the sphere.
@@ -1027,7 +925,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		drawable_object.back().getModel()->isBall = true;
 		this->drawable_object[characterNum].getModel()->shot = false;
 	}
-	//}
 
 	// Release memory for actors array
 	delete[] actors;
@@ -1078,10 +975,6 @@ void Scene::applyPhysXStatic()
 			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
 			//std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;	
 			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
-
-			//this->drawable_object[drawObjID].getModel()->applyPhysxTransf(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z), meshID);
-
-			//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(actorPosition.x, actorPosition.y, -actorPosition.z));
 		}
 	}
 	// Release memory for actors array
@@ -1090,13 +983,6 @@ void Scene::applyPhysXStatic()
 
 physx::PxRigidDynamic* Scene::shootBall(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
 {
-	/*
-	physx::PxRigidDynamic* dynamic = physx::PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
-	dynamic->setAngularDamping(0.5f);
-	dynamic->setLinearVelocity(velocity);
-	gScene->addActor(*dynamic);
-	return dynamic;
-	*/
 	physx::PxRigidDynamic* dynamic = gPhysics->createRigidDynamic(t);
 	physx::PxShape* meshShape;
 	meshShape = gPhysics->createShape(geometry, *gMaterial, true);
