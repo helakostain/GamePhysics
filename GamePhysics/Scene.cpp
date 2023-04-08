@@ -57,7 +57,7 @@ void Scene::Loop()
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
-			if (i != 1) // HACK:: docasne odpohybovani psa
+			if (!this->drawable_object[i].getModel()->isCharacter) // HACK:: docasne odpohybovani psa
 			{
 				this->drawable_object[i].updateObject(delta);
 			}
@@ -591,8 +591,6 @@ void Scene::createConvexMeshes(int i, int j)
 		actorID[meshActor] = i;
 		this->num_balls = i;
 		drawable_object[j].getModel()->actorIDs.push_back(i);
-
-		//TODO: zrychlit!, pridat aby ground byl static a ne dynamic actor, zaridit aby se to tak nerozbijelo, mrknout na github linky v onenotu
 	}
 
 	// Print the elapsed time for comparison
@@ -762,6 +760,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
 	physx::PxActor** actors = new physx::PxActor * [numActors];
 	gScene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC, actors, numActors);
+	int characterNum = 1;
 
 	// Iterate through actors and get their position
 	for (physx::PxU32 i = 0; i < numActors; i++)
@@ -787,6 +786,10 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				if (flagFound)
 				{
 					break;
+				}
+				if (drawable_object[j].getModel()->isCharacter)
+				{
+					characterNum = j;
 				}
 				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
 				{
@@ -833,12 +836,13 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	physx::PxVec3 actorPosition = actorTransform.p;
 
 	glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
-	for (int i = 0; i < this->drawable_object[1].getModel()->meshes.size(); i++) // HACK: natvrdo pozice modelu
+	/*
+	for (int i = 0; i < this->drawable_object[characterNum].getModel()->meshes.size(); i++)
 	{
 		this->drawable_object[1].getModel()->applyPhysxTransf(openMatrix, i);
 		this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 		//this->drawable_object[1].getModel()->Pos_mov(glm::vec3(0.0f, -1.6f, 0.0f));
-	}
+	}*/
 	//camera->setCamera(openMatrix);
 	openMatrix[3].y = openMatrix[3].y + 1.0f;
 	camera->setPosition(openMatrix[3]); // this moves camera to position of character controller
@@ -855,7 +859,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	// Add the resulting vector to the character controller's position to move it in the desired direction
 	glm::vec3 cameraForward = camera->direction();
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	switch (this->drawable_object[1].getModel()->moved) // HACK: natvrdo pozice modelu
+	switch (this->drawable_object[characterNum].getModel()->moved)
 	{
 	case 0:
 		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
@@ -890,71 +894,71 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	}
-	//drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	if (this->drawable_object[1].getModel()->moved != this->drawable_object[1].getModel()->last_moved && this->drawable_object[1].getModel()->moved != 0) // HACK: natvrdo pozice modelu
+	//drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	if (this->drawable_object[characterNum].getModel()->moved != this->drawable_object[characterNum].getModel()->last_moved && this->drawable_object[characterNum].getModel()->moved != 0)
 	{
 		//TODO tohle nefunguje, kdovi proc
-		switch (this->drawable_object[1].getModel()->moved)
+		switch (this->drawable_object[characterNum].getModel()->moved)
 		{
 		case 1:
-			switch (this->drawable_object[1].getModel()->last_moved)
+			switch (this->drawable_object[characterNum].getModel()->last_moved)
 			{
 			case 2:
-				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 3:
-				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 4:
-				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			default:
 				break;
 			}
 			break;
 		case 2:
-			switch (this->drawable_object[1].getModel()->last_moved)
+			switch (this->drawable_object[characterNum].getModel()->last_moved)
 			{
 			case 1:
-				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 3:
-				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 4:
-				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			default:
 				break;
 			}
 			break;
 		case 3:
-			switch (this->drawable_object[1].getModel()->last_moved)
+			switch (this->drawable_object[characterNum].getModel()->last_moved)
 			{
 			case 1:
-				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 2:
-				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 4:
-				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			default:
 				break;
 			}
 			break;
 		case 4:
-			switch (this->drawable_object[1].getModel()->last_moved)
+			switch (this->drawable_object[characterNum].getModel()->last_moved)
 			{
 			case 1:
-				this->drawable_object[1].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 2:
-				this->drawable_object[1].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			case 3:
-				this->drawable_object[1].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+				this->drawable_object[characterNum].getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 				break;
 			default:
 				break;
@@ -963,12 +967,12 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		default:
 			break;
 		}
-		this->drawable_object[1].getModel()->last_moved = drawable_object[1].getModel()->moved;
+		this->drawable_object[characterNum].getModel()->last_moved = drawable_object[characterNum].getModel()->moved;
 	}
 
-	this->drawable_object[1].getModel()->moved = 0; // HACK: natvrdo pozice modelu
+	this->drawable_object[characterNum].getModel()->moved = 0;
 
-	if (this->drawable_object[1].getModel()->shot) // HACK: natvrdo pozice modelu
+	if (this->drawable_object[characterNum].getModel()->shot)
 	{
 		//shootBall(gController->getActor()->getGlobalPose(), physx::PxSphereGeometry(1.0f), gController->getActor()->getGlobalPose().rotate(physx::PxVec3(camera->direction().x, camera->direction().y, camera->direction().z))*10);
 		/*glm::vec3 cameraDir = camera->direction();
@@ -1021,7 +1025,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		actorID[new_ball] = num_balls;
 		drawable_object.back().getModel()->actorIDs.push_back(num_balls);
 		drawable_object.back().getModel()->isBall = true;
-		this->drawable_object[1].getModel()->shot = false;  // HACK: natvrdo pozice modelu
+		this->drawable_object[characterNum].getModel()->shot = false;
 	}
 	//}
 
@@ -1143,7 +1147,6 @@ Scene::Scene(GLFWwindow* in_window)
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("garage"), ShaderInstances::phong(), TextureManager::getOrEmplace("garage", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 1.0f));
-	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("laboratory"), ShaderInstances::phong(), TextureManager::getOrEmplace("laboratory", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 22.0f));
@@ -1153,10 +1156,8 @@ Scene::Scene(GLFWwindow* in_window)
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 22.0f));
 	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	//TODO: swiss house nejde prevest do convex meshe
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 0.0f));
-	//this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
