@@ -419,6 +419,7 @@ void Scene::createTriangleMeshes(int i, int j)
 		//gScene->addActor(*meshActor);
 		actorID[meshActor] = i;
 		drawable_object[j].getModel()->actorIDs.push_back(i);
+		drawable_object[j].getModel()->isCharacter = true;
 
 		/*
 		//this moves the actors
@@ -993,10 +994,10 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		*/
 		physx::PxVec3 pxCameraPos(camera->position().x, camera->position().y, camera->position().z);
 		physx::PxVec3 pxCameraDir(camera->direction().x, camera->direction().y, camera->direction().z);
-		float sphereRadius = 1.0f; // Set the radius of the sphere.
+		float sphereRadius = 0.95f; // Set the radius of the sphere.
 		physx::PxVec3 spherePos = pxCameraPos + (pxCameraDir * (sphereRadius + 1.0f)); // Add 1 unit to avoid collision with the camera.
 		physx::PxTransform sphereTransform(spherePos);
-		float sphereSpeed = 10.0f; // Set the speed of the sphere.
+		float sphereSpeed = 50.0f; // Set the speed of the sphere.
 		physx::PxVec3 sphereVelocity = pxCameraDir * sphereSpeed;
 		physx::PxSphereGeometry sphereGeometry(sphereRadius);
 		physx::PxRigidDynamic* new_ball = shootBall(sphereTransform, sphereGeometry, sphereVelocity);

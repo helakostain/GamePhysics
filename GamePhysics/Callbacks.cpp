@@ -20,6 +20,15 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
     }
     //physx::PxVec3 movementVec;
     //physx::PxControllerCollisionFlags collisionFlags;
+    int characterNum = 1;
+    for (int i = 0; i < drawableObj.size(); i++)
+    {
+        if (drawableObj[i].getModel()->isCharacter)
+        {
+            characterNum = i;
+            break;
+        }
+    }
 
     switch (key) {
     case GLFW_KEY_I:
@@ -50,26 +59,26 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         //model_id 2
         //movementVec = physx::PxVec3(0.0f, 0.0f, 1.0f);
         //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
-        
-        camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::up);
+        drawableObj[characterNum].getModel()->moved = 1;
+        //camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::up);
         break;
     case GLFW_KEY_S:
         //movementVec = physx::PxVec3(0.0f, 0.0f, -1.0f);
         //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
-        
-        camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::down);
+        drawableObj[characterNum].getModel()->moved = 2;
+        //camera->moveForward((action == GLFW_RELEASE) ? Direction::none : Direction::down);
         break;
     case GLFW_KEY_A:
         //movementVec = physx::PxVec3(-1.0f, 0.0f, 0.0f);
         //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
-        
-        camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::left);
+        drawableObj[characterNum].getModel()->moved = 3;
+        //camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::left);
         break;
     case GLFW_KEY_D:
         //movementVec = physx::PxVec3(1.0f, 0.0f, 0.0f);
         //collisionFlags = controller->move(movementVec, 0.01f, 0.5f, physx::PxControllerFilters());
-        
-        camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::right);
+        drawableObj[characterNum].getModel()->moved = 4;
+        //camera->moveSideways((action == GLFW_RELEASE) ? Direction::none : Direction::right);
         break;
     case GLFW_KEY_E:
         if (Callbacks::flashlight->getCutoff() != 0 && action == GLFW_PRESS)
@@ -78,19 +87,19 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
             Callbacks::flashlight->setCutoff(9.f);
         break;
     case GLFW_KEY_UP:
-        drawableObj[1].getModel()->moved = 1; //HACK: hardtype actora
+        drawableObj[characterNum].getModel()->moved = 1;
         //camera->rotateVer((action == GLFW_RELEASE) ? Direction::none : Direction::up);
         break;
     case GLFW_KEY_DOWN:
-        drawableObj[1].getModel()->moved = 2; //HACK: hardtype actora
+        drawableObj[characterNum].getModel()->moved = 2;
         //camera->rotateVer((action == GLFW_RELEASE) ? Direction::none : Direction::down);
         break;
     case GLFW_KEY_LEFT:
-        drawableObj[1].getModel()->moved = 3; //HACK: hardtype actora
+        drawableObj[characterNum].getModel()->moved = 3;
         //camera->rotateHor((action == GLFW_RELEASE) ? Direction::none : Direction::left);
         break;
     case GLFW_KEY_RIGHT:
-        drawableObj[1].getModel()->moved = 4; //HACK: hardtype actora
+        drawableObj[characterNum].getModel()->moved = 4; 
         //camera->rotateHor((action == GLFW_RELEASE) ? Direction::none : Direction::right);
         break;
     case GLFW_KEY_U:
@@ -118,7 +127,7 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         }
         break;
     case GLFW_KEY_SPACE:
-        drawableObj[1].getModel()->shot = ((action == GLFW_RELEASE) ? true : false); //HACK: hardtype actora
+        drawableObj[characterNum].getModel()->shot = ((action == GLFW_RELEASE) ? true : false); 
         break;
     case GLFW_KEY_DELETE:
         if (model_id > 1)

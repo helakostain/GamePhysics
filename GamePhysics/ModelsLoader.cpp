@@ -9,7 +9,6 @@ Models* ModelsLoader::get(const std::string& key)
 
     if (iter != models.end()) 
     {
-        //TODO broken, musim predelat transformace v models nebo kopirovat cely model krome transformace ktera se musi udelat znova jinak nepujde vickrat jeden model
         return iter->second;
     }
     return loadModel(key);
