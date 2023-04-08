@@ -76,7 +76,6 @@ private:
 	void cleanupPhysics();
 
 	void applyPhysXTransform(const float delta, const physx::PxVec3);
-	void applyPhysXStatic();
 	physx::PxRigidDynamic* shootBall(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
 
 	void createForest();

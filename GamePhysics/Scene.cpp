@@ -930,57 +930,6 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	delete[] actors;
 }
 
-void Scene::applyPhysXStatic()
-{
-	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
-	physx::PxActor** actors = new physx::PxActor * [numActors];
-	gScene->getActors(physx::PxActorTypeFlag::eRIGID_STATIC, actors, numActors);
-
-	// Iterate through actors and get their position
-	for (physx::PxU32 i = 0; i < numActors; i++)
-	{
-		//if (actors[1]->is<physx::PxRigidActor>()) // Check if actor is a rigid actor
-		//{
-		if (auto found = actorID.find(actors[i]); found != actorID.end())
-		{
-			int foundID = actorID[actors[i]];
-			//std::cout << "Actor num: " << foundID << " was found." << std::endl;
-			physx::PxRigidActor* rigidActor = static_cast<physx::PxRigidActor*>(actors[i]);
-			physx::PxTransform actorTransform = rigidActor->getGlobalPose();
-			physx::PxMat44 matrix = physx::PxMat44(actorTransform);
-			physx::PxVec3 actorPosition = actorTransform.p;
-
-			glm::mat4 openMatrix = glm::mat4(matrix.column0.x, matrix.column0.y, matrix.column0.z, matrix.column0.w, matrix.column1.x, matrix.column1.y, matrix.column1.z, matrix.column1.w, matrix.column2.x, matrix.column2.y, matrix.column2.z, matrix.column2.w, matrix.column3.x, matrix.column3.y, matrix.column3.z, matrix.column3.w);
-
-			bool flagFound = false;
-			int meshID = 0;
-			int drawObjID = 0;
-			for (int j = 0; j < drawable_object.size(); j++)
-			{
-				if (flagFound)
-				{
-					break;
-				}
-				for (int k = 0; k < drawable_object[j].getModel()->actorIDs.size(); k++)
-				{
-					if (std::find(drawable_object[j].getModel()->actorIDs.begin(), drawable_object[j].getModel()->actorIDs.end(), foundID) != drawable_object[j].getModel()->actorIDs.end())
-					{
-						meshID = foundID;
-						drawObjID = j;
-					}
-				}
-			}
-			//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
-			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->getTransformation(meshID)->matrix()) << std::endl;
-			//std::cout << "Before: " << glm::to_string(this->drawable_object[drawObjID].getModel()->currPosition) << std::endl;
-			//std::cout << "After: " << glm::to_string(glm::vec3(matrix.column3.x, matrix.column3.y, -matrix.column3.z)) << std::endl;	
-			this->drawable_object[drawObjID].getModel()->applyPhysxTransf(openMatrix, meshID);
-		}
-	}
-	// Release memory for actors array
-	delete[] actors;
-}
-
 physx::PxRigidDynamic* Scene::shootBall(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity)
 {
 	physx::PxRigidDynamic* dynamic = gPhysics->createRigidDynamic(t);
