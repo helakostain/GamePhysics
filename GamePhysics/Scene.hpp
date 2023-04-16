@@ -60,16 +60,27 @@ private:
 	physx::PxPvd* gPvd = NULL;
 	physx::PxControllerManager* gControllerManager = NULL;
 	physx::PxController* gController = NULL;
+	physx::PxCudaContextManager* gCudaContextManager = NULL;
+
+	
+	physx::PxRigidDynamic* gear1 = NULL;
+	physx::PxRigidDynamic* gear2 = NULL;
+	physx::PxRigidDynamic* gear3 = NULL;
+	physx::PxRigidDynamic* stick1 = NULL;
+	physx::PxRigidDynamic* stick2 = NULL;
+	physx::PxRigidDynamic* stick3 = NULL;
 
 	std::unordered_map<physx::PxActor*, int> actorID;
 	int num_balls = 0;
 	bool ball_exist = false;
+	bool cudaON = false;  //HACK: need to be changed manually for using GPU for calculations!
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);
 	void createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::PxShape* shape);
 	void createConvexMeshes(int i, int j);
 	void createStaticActor(int i, int j);
+	void createWheelActor(int i, int j, int* gears, int* sticks); //TODO: fixnout ty ozubena kola
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
 
 	void stepPhysics();

@@ -191,11 +191,41 @@ void Scene::initPhysics()
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, physx::PxTolerancesScale(), true, gPvd);
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, physx::PxCookingParams(physx::PxTolerancesScale()));
 
+	physx::PxCudaContextManagerDesc cudaContextManagerDesc;
+	if (cudaON)
+	{
+		cudaContextManagerDesc.interopMode = physx::PxCudaInteropMode::OGL_INTEROP;
+		gCudaContextManager = PxCreateCudaContextManager(*gFoundation, cudaContextManagerDesc, PxGetProfilerCallback());	//Create the CUDA context manager, required for GRB to dispatch CUDA kernels.
+		if (gCudaContextManager)
+		{
+			if (!gCudaContextManager->contextIsValid())
+			{
+				gCudaContextManager->release();
+				gCudaContextManager = NULL;
+				cudaON = false;
+			}
+		}
+	}
+
 	physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-	gDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+	gDispatcher = physx::PxDefaultCpuDispatcherCreate(6); //Create a CPU dispatcher using 6 worker threads
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+	sceneDesc.broadPhaseType = physx::PxBroadPhaseType::eABP;
+
+	if (cudaON)
+	{
+		sceneDesc.cudaContextManager = gCudaContextManager;		//Set the CUDA context manager, used by GRB.
+
+		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_GPU_DYNAMICS;	//Enable GPU dynamics - without this enabled, simulation (contact gen and solver) will run on the CPU.
+		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_PCM;			//Enable PCM. PCM NP is supported on GPU. Legacy contact gen will fall back to CPU
+		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_STABILIZATION;	//Improve solver stability by enabling post-stabilization.
+		sceneDesc.broadPhaseType = physx::PxBroadPhaseType::eGPU;		//Enable GPU broad phase. Without this set, broad phase will run on the CPU.
+		sceneDesc.gpuMaxNumPartitions = 8;						//Defines the maximum number of partitions used by the solver. Only power-of-2 values are valid. 
+		//A value of 8 generally gives best balance between performance and stability.
+	}
+
 	gScene = gPhysics->createScene(sceneDesc);
 
 	physx::PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
@@ -210,11 +240,21 @@ void Scene::initPhysics()
 	physx::PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
 
+	//TODO: fixnout ty ozubena kola
+	//int* gears = new int(0);
+	//int* sticks = new int(0);
+	//bool jointActorAssign = false;
 	for (int j = 0; j < drawable_object.size(); j++)
 	{
 		for (int i = 0; i < drawable_object[j].getModel()->meshes.size(); i++)
 		{
-			if (drawable_object[j].getActorType() == 0)
+			//TODO: fixnout ty ozubena kola
+			/*
+			if ((j == drawable_object.size() - 3) || (j == drawable_object.size() - 2))
+			{
+				createWheelActor(i, j, gears, sticks);
+			}
+			else */if (drawable_object[j].getActorType() == 0)
 			{
 				createStaticActor(i, j);
 			}
@@ -232,6 +272,7 @@ void Scene::initPhysics()
 	const physx::PxU32 numActors = gScene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
 	physx::PxActor** actors = new physx::PxActor * [numActors];
 	gScene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC, actors, numActors);
+	
 	for (int i = 0; i < numActors; i++)
 	{
 		int foundID = actorID[actors[i]];
@@ -250,9 +291,18 @@ void Scene::initPhysics()
 					meshID = foundID;
 				}
 			}
+			
 		}
 		//std::cout << "Found actor number: " << i << " with ID " << foundID << " and mesh id: " << meshID << std::endl;
 	}
+	//TODO: fixnout ty ozubena kola
+	//physx::PxRevoluteJoint* joint = physx::PxRevoluteJointCreate(*gPhysics, stick1, stick1->getGlobalPose(), gear1, gear1->getGlobalPose());
+	//joint->setLocalPose(physx::PxJointActorIndex::eACTOR0, stick1->getGlobalPose().transformInv(transform1));
+	//joint->setLocalPose(physx::PxJointActorIndex::eACTOR1, anchor2->getGlobalPose().transformInv(transform2));
+	//physx::PxRevoluteJoint* joint2 = physx::PxRevoluteJointCreate(*gPhysics, stick2, stick2->getGlobalPose(), gear2, gear2->getGlobalPose());
+	//physx::PxRevoluteJoint* joint3 = physx::PxRevoluteJointCreate(*gPhysics, stick3, stick3->getGlobalPose(), gear3, gear3->getGlobalPose());
+	//float angularVelocity = 10.0f; // radians per second
+	//joint->setDriveVelocity(angularVelocity);
 	delete[] actors;
 }
 
@@ -284,8 +334,8 @@ void Scene::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMe
 
 void Scene::createTriangleMeshes(int i, int j)
 {
-	printf("-----------------------------------------------\n");
-	printf("Create triangles mesh kinematic actor using BVH34 midphase: \n\n");
+	//printf("-----------------------------------------------\n");
+	//printf("Create triangles mesh kinematic actor using BVH34 midphase: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -353,7 +403,7 @@ void Scene::createTriangleMeshes(int i, int j)
 	}
 
 	// Print the elapsed time for comparison
-	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	/*physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
 	printf("\t -----------------------------------------------\n");
 	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
@@ -365,7 +415,7 @@ void Scene::createTriangleMeshes(int i, int j)
 	if (!true)
 	{
 		printf("\t Mesh size: %d \n", meshSize);
-	}
+	}*/
 
 	physx::PxTransform tr = physx::PxTransform(physx::PxVec3(1.0f));
 	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
@@ -417,7 +467,7 @@ void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::P
 	gControllerManager = PxCreateControllerManager(*gScene);
 	gControllerManager->setOverlapRecoveryModule(true); //fixes actors on initial possition to not fall through ground etc
 	physx::PxCapsuleControllerDesc controllerDesc;
-	controllerDesc.height = 3.0f;
+	controllerDesc.height = 2.5f;
 	controllerDesc.radius = 1.0f;
 	controllerDesc.position = physx::PxExtendedVec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z);
 	controllerDesc.material = gMaterial;
@@ -432,8 +482,8 @@ void Scene::createCharacter(int i, int j, physx::PxRigidDynamic* actor, physx::P
 
 void Scene::createConvexMeshes(int i, int j)
 {
-	printf("-----------------------------------------------\n");
-	printf("Create convex mesh dynamic actor: \n\n");
+	//printf("-----------------------------------------------\n");
+	//printf("Create convex mesh dynamic actor: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -519,11 +569,11 @@ void Scene::createConvexMeshes(int i, int j)
 		if (meshShape == nullptr)
 		{
 			// Print the elapsed time for comparison
-			physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+			/*physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 			float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
 			printf("\t -----------------------------------------------\n");
 			printf("\t Create triangle mesh with %d triangles: FAILED\n", numTriangles);
-			printf("\t Elapsed time in ms: %f \n", double(elapsedTime));
+			printf("\t Elapsed time in ms: %f \n", double(elapsedTime));*/
 
 			return;
 		}
@@ -551,7 +601,7 @@ void Scene::createConvexMeshes(int i, int j)
 	}
 
 	// Print the elapsed time for comparison
-	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	/*physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
 	printf("\t -----------------------------------------------\n");
 	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
@@ -563,13 +613,13 @@ void Scene::createConvexMeshes(int i, int j)
 	if (!true)
 	{
 		printf("\t Mesh size: %d \n", meshSize);
-	}
+	}*/
 }
 
 void Scene::createStaticActor(int i, int j)
 {
-	printf("-----------------------------------------------\n");
-	printf("Create triangles mesh static actor: \n\n");
+	//printf("-----------------------------------------------\n");
+	//printf("Create triangles mesh static actor: \n\n");
 	// Favor cooking speed, skip mesh cleanup, but precompute active edges. Insert into PxPhysics.
 	// These settings are suitable for runtime cooking, although selecting more triangles per leaf may reduce
 	// runtime performance of simulation and queries. We still need to ensure the triangles 
@@ -665,7 +715,7 @@ void Scene::createStaticActor(int i, int j)
 	}
 
 	// Print the elapsed time for comparison
-	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	/*physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
 	printf("\t -----------------------------------------------\n");
 	printf("\t Create triangle mesh with %d triangles: \n", numTriangles);
@@ -677,6 +727,148 @@ void Scene::createStaticActor(int i, int j)
 	if (!true)
 	{
 		printf("\t Mesh size: %d \n", meshSize);
+	}*/
+}
+
+void Scene::createWheelActor(int i, int j, int* gears, int* sticks) //TODO: fixnout ty ozubena kola
+{
+	printf("-----------------------------------------------\n");
+	printf("Create gear actor: \n\n");
+	physx::PxU32 numVertices = drawable_object[j].getModel()->meshes[i].gVertices.size();
+	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
+	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
+	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
+
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = numVertices;
+	meshDesc.points.data = vertices;
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.triangles.count = numTriangles;
+	meshDesc.triangles.data = indices;
+	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+
+	bool meshDescValid = meshDesc.isValid();
+	if (!meshDescValid)
+	{
+		printf("Mesh description is not valid!\n");
+	}
+
+	physx::PxCookingParams params = gCooking->getParams();
+
+	// Create BVH34 midphase
+	params.midphaseDesc = physx::PxMeshMidPhase::eBVH34;
+
+	// setup common cooking params
+	setupCommonCookingParams(params, true, false);
+
+	// Cooking mesh with less triangles per leaf produces larger meshes with better runtime performance
+	// and worse cooking performance. Cooking time is better when more triangles per leaf are used.
+	params.midphaseDesc.mBVH34Desc.numPrimsPerLeaf = 15;
+
+	gCooking->setParams(params);
+
+#if defined(PX_CHECKED) || defined(PX_DEBUG)
+	// If DISABLE_CLEAN_MESH is set, the mesh is not cleaned during the cooking. 
+	// We should check the validity of provided triangles in debug/checked builds though.
+	if (true)
+	{
+		PX_ASSERT(gCooking->validateTriangleMesh(meshDesc));
+	}
+#endif // DEBUG
+
+	physx::PxTriangleMesh* triMesh = NULL;
+	physx::PxU32 meshSize = 0;
+	bool insertion = false;
+	// The cooked mesh may either be saved to a stream for later loading, or inserted directly into PxPhysics.
+	if (insertion)
+	{
+		triMesh = gCooking->createTriangleMesh(meshDesc, gPhysics->getPhysicsInsertionCallback());
+	}
+	else
+	{
+		physx::PxDefaultMemoryOutputStream outBuffer;
+		gCooking->cookTriangleMesh(meshDesc, outBuffer);
+		physx::PxDefaultMemoryInputData stream(outBuffer.getData(), outBuffer.getSize());
+		triMesh = gPhysics->createTriangleMesh(stream);
+
+
+		meshSize = outBuffer.getSize();
+	}
+
+	physx::PxTransform tr = physx::PxTransform(physx::PxVec3(1.0f));
+	physx::PxRigidDynamic* meshActor = gPhysics->createRigidDynamic(tr);
+	physx::PxShape* meshShape;
+	if (meshActor)
+	{
+		physx::PxTriangleMeshGeometry triGeom;
+		triGeom.triangleMesh = triMesh;
+		meshShape = gPhysics->createShape(triGeom, *gMaterial, true);
+		meshShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		meshShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
+		meshActor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+
+		physx::PxFilterData filterData;
+		filterData.word0 = 1 << 0; // Set the first bit to 1 for kinematic actors
+		filterData.word1 = 1 << 1; // Set the second bit to 1 for default collision flag
+		meshShape->setSimulationFilterData(filterData);
+
+		meshActor->attachShape(*meshShape);
+		meshActor->setMass(16.0f);
+		meshActor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
+		physx::PxMat44 matrix = physx::PxMat44(physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].x,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].y,
+			this->drawable_object[j].getModel()->getTransformation(i)->matrix()[0].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].x,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].y,
+				this->drawable_object[j].getModel()->getTransformation(i)->matrix()[1].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].x,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].y,
+					this->drawable_object[j].getModel()->getTransformation(i)->matrix()[2].z), physx::PxVec3(this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].x,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].y,
+						this->drawable_object[j].getModel()->getTransformation(i)->matrix()[3].z));
+		meshActor->setGlobalPose(physx::PxTransform(matrix));
+		actorID[meshActor] = i;
+		drawable_object[j].getModel()->actorIDs.push_back(i);
+		gScene->addActor(*meshActor);
+	}
+	if (j == drawable_object.size() - 3)
+	{
+		switch (*gears)
+		{
+		case 0:
+			gear1 = meshActor;
+			(*gears)++;
+			break;
+		case 1:
+			gear2 = meshActor;
+			(*gears)++;
+			break;
+		case 2:
+			gear3 = meshActor;
+			(*gears)++;
+			break;
+		default:
+			break;
+		}
+	}
+	else if (j == drawable_object.size() - 2)
+	{
+
+		switch (*sticks)
+		{
+		case 0:
+			stick1 = meshActor;
+			(*sticks)++;
+			break;
+		case 1:
+			stick2 = meshActor;
+			(*sticks)++;
+			break;
+		case 2:
+			gear3 = meshActor;
+			(*sticks)++;
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -704,6 +896,10 @@ void Scene::cleanupPhysics()
 		transport->release();
 	}
 	gFoundation->release();
+	if (cudaON)
+	{
+		gCudaContextManager->release();
+	}
 
 	printf("PhysX done.\n");
 }
@@ -910,7 +1106,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				if (drawable_object[k].getModel()->isBall)
 				{
 					this->drawable_object.emplace_back(DrawableObject( new Models(*drawable_object[k].getModel()), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
-					
+
 				}
 			}
 		}
@@ -993,6 +1189,24 @@ Scene::Scene(GLFWwindow* in_window)
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 0.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("bighouse"), ShaderInstances::phong(), TextureManager::getOrEmplace("bighouse", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.1f, -20.0f));
+
+	//TODO: fixnout ty ozubena kola
+	/*
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("gears"), ShaderInstances::phong(), TextureManager::getOrEmplace("gears", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.1f, -20.0f));
+	this->drawable_object.back().getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("stick"), ShaderInstances::phong(), TextureManager::getOrEmplace("stick", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.1f, -20.0f));
+	this->drawable_object.back().getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("bases"), ShaderInstances::phong(), TextureManager::getOrEmplace("bases", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.1f, -20.0f));
+	this->drawable_object.back().getModel()->rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	*/
 	
 	camera = new Camera();
 	camera->registerObserver(ShaderInstances::constant());
