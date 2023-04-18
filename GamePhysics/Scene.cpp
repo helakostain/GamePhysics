@@ -1106,7 +1106,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 				if (drawable_object[k].getModel()->isBall)
 				{
 					this->drawable_object.emplace_back(DrawableObject( new Models(*drawable_object[k].getModel()), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
-
+					break;
 				}
 			}
 		}
@@ -1191,7 +1191,7 @@ Scene::Scene(GLFWwindow* in_window)
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 0.0f));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("bighouse"), ShaderInstances::phong(), TextureManager::getOrEmplace("bighouse", "Textures/white_tex.png"), drawable_object.size(), true, 0));
-	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.1f, -20.0f));
+	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, -20.0f));
 
 	//TODO: fixnout ty ozubena kola
 	/*

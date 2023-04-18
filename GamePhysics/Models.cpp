@@ -43,7 +43,8 @@ Models::Models(Models& old) noexcept
 	}
 	for (int i = 0; i < old.meshes.size(); i++)
 	{
-		const Material& mat = { old.meshes[i].material.diffuse, old.meshes[i].material.specular, old.meshes[i].material.ambient, old.meshes[i].material.diffuseMap, old.meshes[i].material.specularMap, old.meshes[i].material.heightMap, old.meshes[i].material.shininess};
+		//const Material& mat = { old.meshes[i].material.diffuse, old.meshes[i].material.specular, old.meshes[i].material.ambient, old.meshes[i].material.diffuseMap, old.meshes[i].material.specularMap, old.meshes[i].material.heightMap, old.meshes[i].material.shininess};
+		const Material& mat = { std::move(old.materials[i].diffuse), std::move(old.materials[i].specular), std::move(old.materials[i].ambient), std::move(old.materials[i].diffuseMap), std::move(old.materials[i].specularMap), std::move(old.materials[i].heightMap), std::move(old.materials[i].shininess) };
 		std::vector<Vertex> vertices;
 		for (int j = 0; j < old.meshes[i].vertices.size(); j++)
 		{
@@ -56,10 +57,12 @@ Models::Models(Models& old) noexcept
 		}
 		Mesh mesh(vertices, indices, mat);
 		this->meshes.emplace_back(std::move(mesh));
+		//this->materials.push_back(mat);
 	}
 	for (int i = 0; i < old.materials.size(); i++)
 	{
-		this->materials.push_back(old.materials[i]);
+		const Material& mat = { std::move(old.materials[i].diffuse), std::move(old.materials[i].specular), std::move(old.materials[i].ambient), std::move(old.materials[i].diffuseMap), std::move(old.materials[i].specularMap), std::move(old.materials[i].heightMap), std::move(old.materials[i].shininess) };
+		this->materials.push_back(mat);
 	}
 	this->directory = old.directory;
 	for (int i = 0; i < old.shaders.size(); i++)
