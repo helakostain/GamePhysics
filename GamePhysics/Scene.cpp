@@ -13,7 +13,8 @@ void Scene::Loop()
 	skybox->Draw();
 
 	//Gamma correction
-	//glEnable(GL_FRAMEBUFFER_SRGB); 
+	//glEnable(GL_FRAMEBUFFER_SRGB);
+	glDisable(GL_FRAMEBUFFER_SRGB);
 
 	glClear(GL_DEPTH_BUFFER_BIT); //clear window content
 	glEnable(GL_DEPTH_TEST);
