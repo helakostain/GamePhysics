@@ -1168,11 +1168,11 @@ physx::PxRigidDynamic* Scene::shootBall(const physx::PxTransform& t, const physx
 
 void Scene::createForest()
 {
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree0"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree0_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, -10.0f));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree1"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree1_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-24.0f, 0.3f, -13.0f));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree2"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("tree2_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("tree0_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-18.0f, 0.3f, -17.0f));
 }
 
@@ -1192,31 +1192,31 @@ Scene::Scene(GLFWwindow* in_window)
 
 	srand(time(NULL));
 	this->skybox = std::make_shared<Skybox>(TextureManager::cubeMap("skybox", cubemapTextures));
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_with_fence"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_with_fence", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("ground_with_fence_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("ground_with_fence_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 
 	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("dog"), ShaderInstances::phong(), TextureManager::getOrEmplace("dog", "Textures/white_tex.png"), drawable_object.size(), true, 2));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, 0.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall2"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("wall_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("wall_high", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(5.0f, 0.3f, 15.0f));
 	
 	createForest();
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("garage"), ShaderInstances::phong(), TextureManager::getOrEmplace("garage", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("garage_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("garage_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 1.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("laboratory"), ShaderInstances::phong(), TextureManager::getOrEmplace("laboratory", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("laboratory_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("laboratory_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(-20.0f, 0.3f, 22.0f));
 	this->drawable_object.back().getModel()->rotate(270.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("pizza"), ShaderInstances::phong(), TextureManager::getOrEmplace("pizza", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("pizza_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("pizza_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(20.0f, 0.4f, 22.0f));
 	this->drawable_object.back().getModel()->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("swiss_house_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("swiss_house_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(25.0f, 0.3f, 0.0f));
 
-	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("bighouse"), ShaderInstances::phong(), TextureManager::getOrEmplace("bighouse", "Textures/white_tex.png"), drawable_object.size(), true, 0));
+	this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("bighouse_high"), ShaderInstances::phong(), TextureManager::getOrEmplace("bighouse_high", "Textures/white_tex.png"), drawable_object.size(), true, 0));
 	this->drawable_object.back().getModel()->Pos_mov(glm::vec3(0.0f, 0.3f, -20.0f));
 
 	//TODO: fixnout ty ozubena kola
