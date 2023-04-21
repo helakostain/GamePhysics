@@ -915,7 +915,8 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	// Iterate through actors and get their position
 	for (physx::PxU32 i = 0; i < numActors; i++)
 	{
-		if (auto found = actorID.find(actors[i]); found != actorID.end())
+		auto found = actorID.find(actors[i]);
+		if (found != actorID.end())
 		{
 			int foundID = actorID[actors[i]];
 			//std::cout << "Actor num: " << foundID << " was found." << std::endl;
@@ -1106,14 +1107,15 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 			{
 				if (drawable_object[k].getModel()->isBall)
 				{
-					this->drawable_object.emplace_back(DrawableObject( new Models(*drawable_object[k].getModel()), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+					//this->drawable_object.emplace_back(DrawableObject( new Models(*drawable_object[k].getModel()), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+					this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere2"), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 					break;
 				}
 			}
 		}
 		else
 		{
-			this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere"), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere", "Textures/white_tex.png"), drawable_object.size(), true, 1));
+			this->drawable_object.emplace_back(DrawableObject(ModelsLoader::get("sphere2"), ShaderInstances::phong(), TextureManager::getOrEmplace("sphere2", "Textures/white_tex.png"), drawable_object.size(), true, 1));
 			this->ball_exist = true;
 		}
 		num_balls++;
@@ -1217,8 +1219,8 @@ Scene::Scene(GLFWwindow* in_window)
 	camera->registerObserver(ShaderInstances::phong_norm());
 	camera->registerObserver(ShaderInstances::skybox());
 
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ -10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
-	emplaceLight(glm::vec3{ 1.f }, glm::vec3{ 10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 0.6f }, glm::vec3{ -10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
+	emplaceLight(glm::vec3{ 0.6f }, glm::vec3{ 10.f, 50.f, -20.f }, gl::Light::Directional); //SUN OR MOON
 	emplaceLight(glm::vec3{ 0.f, 1.f,1.f }, glm::vec3{ -1.f, 2.f, 5.f }, -glm::vec3{ 40.f, 8.f, 0.f }, 0); // FLASHLIGHT (spotlight) - position is set in while loop, zero at end is turned off
 	emplaceAmbientLight(glm::vec3{ .1f });
 

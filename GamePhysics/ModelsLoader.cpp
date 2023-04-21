@@ -7,10 +7,10 @@ Models* ModelsLoader::get(const std::string& key)
 {
     auto iter = models.find(key);
 
-    if (iter != models.end()) 
-    {
-        return iter->second;
-    }
+    //if (iter != models.end()) 
+    //{
+    //    return iter->second;
+    //}
     return loadModel(key);
 }
 

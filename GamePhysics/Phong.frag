@@ -93,7 +93,7 @@ vec3 directional_light(vec3 color, vec3 worldPos, vec3 normalVector, vec3 lightD
 
 
     
-    const float specularStrength = 0.4;
+    const float specularStrength = 0.6;
 
     vec3 lightDir = normalize(lightDirection); //norm
     float dot_product = dot(lightDir, normalVector);
@@ -106,7 +106,11 @@ vec3 directional_light(vec3 color, vec3 worldPos, vec3 normalVector, vec3 lightD
     float specValue = pow(max(dot(viewDir, reflectionDir), 0.0), material.shininess);
     vec3 spec = specularStrength * (specValue * material.specular) * lightColor;
     if (dot_product < 0.0) {
-        spec = vec3(0.0);
+        //spec = vec3(0.0f);
+        diff =  (lightColor) * (0.01 * material.diffuse);
+        specValue = pow(max(dot(viewDir, reflectionDir), 0.0), material.shininess);
+        spec = specularStrength * (specValue * material.specular) * lightColor;
+        spec *= 0.01;
     }
 
     //return ((diffuse + spec) * color)*0.2; //for moon
@@ -143,10 +147,10 @@ void main () {
         }
     }
 
-    vec3 out_color2 = ambientColor + fragColor;
-    out_color2*= 1.5f;
+    vec3 out_color2 = fragColor;
+    out_color2*= 1.0f;
     out_color2 = out_color2 / (1.0f + out_color2);
-    out_color = vec4(pow(out_color2, vec3(1.0f/2.4f)), 1);
+    out_color = vec4(pow(out_color2, vec3(1.0f/2.2f)), 1);
     //TODO: gamma correction test (need polishing ALOT)
    // float gamma = 1.2;
    // out_color = vec4(pow(ambientColor, vec3(1.0/gamma)) + fragColor, 1);

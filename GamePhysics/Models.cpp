@@ -55,7 +55,7 @@ Models::Models(Models& old) noexcept
 		{
 			indices.push_back(old.meshes[i].indices[j]);
 		}
-		Mesh mesh(vertices, indices, mat);
+		Mesh mesh(std::move(vertices), std::move(indices), std::move(mat));
 		this->meshes.emplace_back(std::move(mesh));
 		//this->materials.push_back(mat);
 	}
