@@ -34,8 +34,11 @@ void Scene::Loop()
 	applyLights();
 
 	const physx::PxVec3 gravity(0, -9.81f, 0); // -9.81 m/s^2 in the negative Y direction
+	double frameTime = glfwGetTime();
+	int nbFrames = 0;
 
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
+		
 		//physx part
 		stepPhysics();
 
@@ -46,6 +49,25 @@ void Scene::Loop()
 		glClear(GL_DEPTH_BUFFER_BIT); //clear window content
 		const TimePoint now = std::chrono::high_resolution_clock::now(); //new current time
 		const float delta = float(std::chrono::duration_cast<Second>(now - lastTime).count()); //change of before and now time
+
+		double currFrameTime = glfwGetTime();
+		nbFrames++;
+		if (currFrameTime - frameTime >= 1.0) { // If last prinf() was more than 1 sec ago
+			// printf and reset timer
+			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+
+			char title[256];
+			title[255] = '\0';
+
+			snprintf(title, 255,
+				"%s %s - [FPS: %3.2f]",
+				"Game Physics", "", double(nbFrames) / (currFrameTime - frameTime));
+
+			glfwSetWindowTitle(window, title);
+
+			nbFrames = 0;
+			frameTime += 1.0;
+		}
 
 		ambientLight.apply();
 		applyLights();
@@ -345,7 +367,7 @@ void Scene::createTriangleMeshes(int i, int j)
 	const physx::PxVec3* vertices = drawable_object[j].getModel()->meshes[i].gVertices.data();
 	physx::PxU32 numTriangles = drawable_object[j].getModel()->meshes[i].indices.size() / 3;
 	const physx::PxU32* indices = drawable_object[j].getModel()->meshes[i].indices.data();
-	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
+	//physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 
 	physx::PxTriangleMeshDesc meshDesc;
 	meshDesc.points.count = numVertices;
@@ -1156,6 +1178,7 @@ void Scene::createForest()
 
 Scene::Scene(GLFWwindow* in_window)
 {
+	auto start = std::chrono::high_resolution_clock::now();
 	this->window = in_window;
 
 	static std::vector<std::string> cubemapTextures{
@@ -1228,13 +1251,29 @@ Scene::Scene(GLFWwindow* in_window)
 	mouse.instance().registerObserver(*this);
 
 	Callbacks::Init(window, std::ref(drawable_object), camera, lights[1]); //Initialize Callbacks with drawable object and camera
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	printf("\t -----------------------------------------------\n");
+	printf("\t Scene was initialized in %f seconds \n", double(duration.count() / ( 1000.0f * 1000.0f) ));
+	printf("\t -----------------------------------------------\n");
 }
 
 void Scene::Run()
 {
+	physx::PxU64 startTime = physx::shdfnd::Time::getCurrentCounterValue();
 	initPhysics();
-
+	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
+	printf("\t -----------------------------------------------\n");
+	printf("\t PhysX initialized in %f ms \n", double(elapsedTime));
+	printf("\t -----------------------------------------------\n");
+	startTime = physx::shdfnd::Time::getCurrentCounterValue();
 	Loop();
+	stopTime = physx::shdfnd::Time::getCurrentCounterValue();
+	elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f * 1000.0f);
+	printf("\t -----------------------------------------------\n");
+	printf("\t Simulation ran for %f seconds \n", double(elapsedTime));
+	printf("\t -----------------------------------------------\n");
 	cleanupPhysics();
 }
 

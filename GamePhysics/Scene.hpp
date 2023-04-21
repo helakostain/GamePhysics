@@ -73,7 +73,7 @@ private:
 	std::unordered_map<physx::PxActor*, int> actorID;
 	int num_balls = 0;
 	bool ball_exist = false;
-	bool cudaON = true;  //HACK: need to be changed manually for using GPU for calculations!
+	bool cudaON = false;  //HACK: need to be changed manually for using GPU for calculations!
 
 	void initPhysics();
 	void createTriangleMeshes(int i, int j);
