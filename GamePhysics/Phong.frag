@@ -137,5 +137,5 @@ void main () {
     vec3 out_color2 = fragColor;
     out_color2*= 1.0f;
     out_color2 = out_color2 / (1.0f + out_color2);
-    out_color = vec4(pow(out_color2, vec3(1.0f/2.2f)), 1);
+    out_color = vec4(pow(out_color2, vec3(1.0f/2.4f)), 1);
 }

@@ -14,7 +14,7 @@ private:
 
 	void StartGLFW(); //initialize GLFW
 	void StartGLEW(); //initialize GLEW
-	void CreateWindow();
+	void CreateNewWindow();
 	void VersionInfo(); //Writes all Versions to console
 public:
 	Application();

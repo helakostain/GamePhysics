@@ -17,7 +17,7 @@ void Application::StartGLEW()
 	glewInit();
 }
 
-void Application::CreateWindow()
+void Application::CreateNewWindow()
 {
 	window = glfwCreateWindow(width, height, "Game physics", NULL, NULL);
 	if (!window) {
@@ -44,7 +44,7 @@ Application::Application()
 	this->height = 900;
 	this->width = 1600; // HD+ resolution as default
 	StartGLFW();
-	CreateWindow();
+	CreateNewWindow();
 }
 
 Application::~Application()
@@ -65,7 +65,7 @@ Application& Application::getInstance()
 void Application::Run()
 {
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 	StartGLEW();
 	VersionInfo();
 	int width, height;

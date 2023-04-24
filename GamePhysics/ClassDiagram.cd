@@ -20,7 +20,7 @@
   <Class Name="Camera" Collapsed="true">
     <Position X="3.25" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ABACEABAEoAAIEACIAAQMQIDwBgAAEAgAQBIUgAGgSA=</HashCode>
+      <HashCode>ABACEABAEoAAIEICIAAQMQIDwBgAAEAggQBIUgAGgSA=</HashCode>
       <FileName>Camera.hpp</FileName>
     </TypeIdentifier>
   </Class>
@@ -56,9 +56,9 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="Mesh" Collapsed="true">
-    <Position X="9.5" Y="7.5" Width="1.5" />
+    <Position X="9.5" Y="9" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAAAQIAAAAAIAEAAAAAAAAAAAAAQAgIAAQAAAABAAAA=</HashCode>
+      <HashCode>EAAAQIAAAAAIAEAAAAAAAAAAAAAQAgIAAQAgAABAAAA=</HashCode>
       <FileName>Mesh.hpp</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -68,7 +68,7 @@
   <Class Name="Models" Collapsed="true">
     <Position X="1.5" Y="12.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QACAggCACgBQAiAAACMQAAAEhAEAACACARgSBER04AA=</HashCode>
+      <HashCode>QACAggCACgBQAiAAACMQAAAEhEEAACACCZgSBER04AA=</HashCode>
       <FileName>Models.hpp</FileName>
     </TypeIdentifier>
   </Class>
@@ -131,7 +131,7 @@
   <Class Name="Scene" Collapsed="true">
     <Position X="7.5" Y="4.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gIAABAEoFoCCQCAogIEIQFEcwIIBAAAoAgAgQAIgCAI=</HashCode>
+      <HashCode>goAAhAEoFoCCQCBogIEIQFEMwIIBAAAoAgAgSAJgCAI=</HashCode>
       <FileName>Scene.hpp</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -214,7 +214,7 @@
     </TypeIdentifier>
   </Class>
   <Struct Name="Material" Collapsed="true">
-    <Position X="9.5" Y="9.5" Width="1.5" />
+    <Position X="9.5" Y="11" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QABBAAAAAAAAAAAAAAAAAAIAAIAAEAAAAAAAAABAAAA=</HashCode>
       <FileName>Mesh.hpp</FileName>

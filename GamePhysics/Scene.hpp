@@ -16,6 +16,8 @@
 #include "Texture.hpp"
 #include "PxPhysicsAPI.h"
 #include "PsTime.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 #include <GLFW/glfw3.h> // DO NOT MOVE UP!!!!!!
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -74,7 +76,7 @@ private:
 	void createStaticActor(int i, int j);
 	void setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
 
-	void stepPhysics();
+	void stepPhysics(double delta);
 	void cleanupPhysics();
 
 	void applyPhysXTransform(const float delta, const physx::PxVec3);

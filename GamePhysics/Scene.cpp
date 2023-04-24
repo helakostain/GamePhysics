@@ -7,6 +7,10 @@
 
 void Scene::Loop()
 {
+	auto logger = spdlog::basic_logger_mt("performance_logger", "logs/performanceID1.log");
+	logger->set_level(spdlog::level::info);
+	logger->info("FrameTime;SimTime;ApplyTime");
+
 	TimePoint lastTime = std::chrono::high_resolution_clock::now(); //current time
 	skybox->Draw();
 
@@ -31,13 +35,23 @@ void Scene::Loop()
 	applyLights();
 
 	const physx::PxVec3 gravity(0, -9.81f, 0); // -9.81 m/s^2 in the negative Y direction
-	double frameTime = glfwGetTime();
+	double t0 = glfwGetTime();
+	double FPS = glfwGetTime();
 	int nbFrames = 0;
-
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
 		//physx part
-		stepPhysics();
-
+		double t1 = glfwGetTime();
+		double frameTime = t1 - t0;
+		if ( frameTime < 0.001 )
+		{
+			frameTime = 1.0 / 60.0;
+		}
+		
+		stepPhysics( frameTime );
+		double t2 = glfwGetTime();
+		double simTime = t2 - t1;
+		t0 = t1;
+		//printf( "time: %f\n", simTime );
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // clear color and depth buffer
 		
 		skybox->Draw();
@@ -46,23 +60,17 @@ void Scene::Loop()
 		const TimePoint now = std::chrono::high_resolution_clock::now(); //new current time
 		const float delta = float(std::chrono::duration_cast<Second>(now - lastTime).count()); //change of before and now time
 
-		double currFrameTime = glfwGetTime();
-		nbFrames++;
-		if (currFrameTime - frameTime >= 1.0) { // If last printf() was more than 1 sec ago
-			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
-			char title[256];
-			title[255] = '\0';
-			snprintf(title, 255,"%s %s - [FPS: %3.2f]","Game Physics", "", double(nbFrames) / (currFrameTime - frameTime));
-			glfwSetWindowTitle(window, title);
-			nbFrames = 0;
-			frameTime += 1.0;
-		}
+		
 
 		ambientLight.apply();
 		applyLights();
-
+		double t3 = glfwGetTime();
 		//physx part
 		applyPhysXTransform(delta, gravity);
+		double t4 = glfwGetTime();
+		double applyTime = t4 - t3;
+		//printf("apply time %f\n", applyTime);
+		logger->info("{:.6f};{:.6f};{:.6f}", frameTime, simTime, applyTime);
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
@@ -78,7 +86,22 @@ void Scene::Loop()
 
 		glfwPollEvents(); // update other events like input handling
 		glfwSwapBuffers(window); // put the stuff weve been drawing onto the display
+		
+		double currFrameTime = glfwGetTime();
+		nbFrames++;
+
+		if ( currFrameTime - FPS >= 1.0 ) { // If last printf() was more than 1 sec ago
+			//printf( "%f ms/frame\n", 1000.0 / double( nbFrames ) );
+			char title[256];
+			title[255] = '\0';
+			snprintf( title, 255, "%s %s - [FPS: %3.2f]", "Game Physics", "", double( nbFrames ) / ( currFrameTime - FPS) );
+			glfwSetWindowTitle( window, title );
+			nbFrames = 0;
+			FPS += 1.0;
+		}
 	}
+	//logger->info("done");
+	logger->flush();
 }
 
 size_t Scene::lightCount() const
@@ -629,9 +652,9 @@ void Scene::createStaticActor(int i, int j)
 	}
 }
 
-void Scene::stepPhysics()
+void Scene::stepPhysics(double delta)
 {
-	gScene->simulate(1.0f / 60.0f);
+	gScene->simulate((float)delta);
 	gScene->fetchResults(true);
 }
 
@@ -646,6 +669,10 @@ void Scene::cleanupPhysics()
 	gDispatcher->release();
 	gPhysics->release();
 	gCooking->release();
+	if ( cudaON )
+	{
+		gCudaContextManager->release();
+	}
 	if (gPvd)
 	{
 		physx::PxPvdTransport* transport = gPvd->getTransport();
@@ -653,10 +680,7 @@ void Scene::cleanupPhysics()
 		transport->release();
 	}
 	gFoundation->release();
-	if (cudaON)
-	{
-		gCudaContextManager->release();
-	}
+	
 
 	printf("PhysX done.\n");
 }
