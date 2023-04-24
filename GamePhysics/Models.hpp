@@ -79,6 +79,7 @@ public:
 	int moved = 0; // 1 = forward, 2 = back, 3 = left, 4 = right
 	int last_moved = 3; // 1 = forward, 2 = back, 3 = left, 4 = right
 	bool shot = false;
+	bool jumped = false;
 	bool isBall = false;
 	bool isCharacter = false;
 };

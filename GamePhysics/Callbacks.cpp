@@ -75,6 +75,9 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         else if (action == GLFW_PRESS)
             Callbacks::flashlight->setCutoff(9.f);
         break;
+    case GLFW_KEY_F:
+        drawableObj[characterNum].getModel()->shot = ((action == GLFW_RELEASE) ? true : false);
+        break;
     case GLFW_KEY_UP:
         drawableObj[characterNum].getModel()->moved = 1;
         //camera->rotateVer((action == GLFW_RELEASE) ? Direction::none : Direction::up);
@@ -116,7 +119,8 @@ void Callbacks::key_callback(GLFWwindow* window, int key, int scancode, int acti
         }
         break;
     case GLFW_KEY_SPACE:
-        drawableObj[characterNum].getModel()->shot = ((action == GLFW_RELEASE) ? true : false); 
+        //drawableObj[characterNum].getModel()->jumped = ((action == GLFW_RELEASE) ? false : true);
+        drawableObj[characterNum].getModel()->jumped = ((action == GLFW_RELEASE) ? true : true);
         break;
     default:
         break;

@@ -813,6 +813,24 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		drawable_object.back().getModel()->isBall = true;
 		this->drawable_object[characterNum].getModel()->shot = false;
 	}
+
+	if (this->drawable_object[characterNum].getModel()->jumped)
+	{
+		physx::PxControllerFilters filters;
+		physx::PxVec3 velocity(0.0f, 100.0f, 0.0f);
+		physx::PxControllerCollisionFlags flags = gController->move(velocity * delta * (9.81f), 1.f, delta, filters);
+		if (collisionFlags & physx::PxControllerCollisionFlag::eCOLLISION_DOWN)
+		{
+			this->drawable_object[characterNum].getModel()->jumped = false;
+		}
+		else
+		{
+			physx::PxVec3 velocity(0.0f, -100.0f, 0.0f);
+			gController->move(velocity * delta * (9.81f), 1.f, delta, filters);
+			this->drawable_object[characterNum].getModel()->jumped = false;
+		}
+		//gController->move(physx::PxVec3(0.0f, 1.0f, 0.0f), 0.5f, delta, physx::PxControllerFilters());
+	}
 	// Release memory for actors array
 	delete[] actors;
 }
