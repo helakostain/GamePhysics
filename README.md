@@ -7,6 +7,7 @@ To use this project for physics simulation using PhysX physics engine you need t
  - GLM https://github.com/g-truc/glm
  - PhysX 4.1 https://github.com/NVIDIAGameWorks/PhysX
  - SOIL https://github.com/Pikachuxxxx/SOIL
+ - spdlog https://github.com/gabime/spdlog
  - Visual Studio 2022
 Currently this project is configured for running in "Release" mode in visual studio, but it is possible with changes in libraries to be run as "Debug". Debug mode is much slower, but offers to great debugging options as mesh validation and using the PhysX Visual Debugger program for more debugging options. Also in the console is written the performance of the application on system and in the title name of the window is also shown current Frame per Second. 
 

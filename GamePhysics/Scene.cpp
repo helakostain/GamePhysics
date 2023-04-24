@@ -38,6 +38,7 @@ void Scene::Loop()
 	double t0 = glfwGetTime();
 	double FPS = glfwGetTime();
 	int nbFrames = 0;
+	int skip = 0;
 	while (!glfwWindowShouldClose(window)) {  //main while loop for constant rendering of scene
 		//physx part
 		double t1 = glfwGetTime();
@@ -70,7 +71,11 @@ void Scene::Loop()
 		double t4 = glfwGetTime();
 		double applyTime = t4 - t3;
 		//printf("apply time %f\n", applyTime);
-		logger->info("{:.6f};{:.6f};{:.6f}", frameTime, simTime, applyTime);
+		if (skip > 100)	{
+			logger->info("{:.6f};{:.6f};{:.6f}", frameTime, simTime, applyTime);
+		} else {
+			skip++;
+		}
 
 		for (int i = 0; i < this->drawable_object.size(); i++) //apply for all draw objects
 		{
@@ -899,9 +904,13 @@ Scene::Scene(GLFWwindow* in_window)
 	Callbacks::Init(window, std::ref(drawable_object), camera, lights[1]); //Initialize Callbacks with drawable object and camera
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-	printf("\t -----------------------------------------------\n");
-	printf("\t Scene was initialized in %f seconds \n", double(duration.count() / ( 1000.0f * 1000.0f) ));
-	printf("\t -----------------------------------------------\n");
+	//printf("\t -----------------------------------------------\n");
+	//printf("\t Scene was initialized in %f seconds \n", double(duration.count() / ( 1000.0f * 1000.0f) ));
+	//printf("\t -----------------------------------------------\n");
+	auto logger = spdlog::basic_logger_mt("scene_logger", "logs/sceneID1.log");
+	logger->set_level(spdlog::level::info);
+	logger->info("Scene initialized in {:.3f} seconds", double(duration.count() / (1000.0f * 1000.0f)));
+	logger->flush();
 }
 
 void Scene::Run()
@@ -910,9 +919,13 @@ void Scene::Run()
 	initPhysics();
 	physx::PxU64 stopTime = physx::shdfnd::Time::getCurrentCounterValue();
 	float elapsedTime = physx::shdfnd::Time::getCounterFrequency().toTensOfNanos(stopTime - startTime) / (100.0f * 1000.0f);
-	printf("\t -----------------------------------------------\n");
-	printf("\t PhysX initialized in %f ms \n", double(elapsedTime));
-	printf("\t -----------------------------------------------\n");
+	//printf("\t -----------------------------------------------\n");
+	//printf("\t PhysX initialized in %f ms \n", double(elapsedTime));
+	//printf("\t -----------------------------------------------\n");
+	auto logger = spdlog::basic_logger_mt("physx_logger", "logs/physxID1.log");
+	logger->set_level(spdlog::level::info);
+	logger->info("PhysX initialized in {:.6f} ms", double(elapsedTime));
+	logger->flush();
 	startTime = physx::shdfnd::Time::getCurrentCounterValue();
 	Loop();
 	stopTime = physx::shdfnd::Time::getCurrentCounterValue();
