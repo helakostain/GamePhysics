@@ -7,7 +7,7 @@
 
 void Scene::Loop()
 {
-	auto logger = spdlog::basic_logger_mt("performance_logger", "logs/performanceID1.log");
+	auto logger = spdlog::basic_logger_mt("performance_logger", "logs/performanceID2.log");
 	logger->set_level(spdlog::level::info);
 	logger->info("FrameTime;SimTime;ApplyTime");
 
@@ -818,7 +818,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 	{
 		physx::PxControllerFilters filters;
 		physx::PxVec3 velocity(0.0f, 100.0f, 0.0f);
-		physx::PxControllerCollisionFlags flags = gController->move(velocity * delta * (9.81f), 1.f, delta, filters);
+		physx::PxControllerCollisionFlags flags = gController->move(velocity * delta * (9.81f), 0.1f, 10.0f * delta, filters);
 		if (collisionFlags & physx::PxControllerCollisionFlag::eCOLLISION_DOWN)
 		{
 			this->drawable_object[characterNum].getModel()->jumped = false;
@@ -826,7 +826,7 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		else
 		{
 			physx::PxVec3 velocity(0.0f, -100.0f, 0.0f);
-			gController->move(velocity * delta * (9.81f), 1.f, delta, filters);
+			gController->move(velocity * delta * (9.81f), 0.1f, 10.0f*delta, filters);
 			this->drawable_object[characterNum].getModel()->jumped = false;
 		}
 		//gController->move(physx::PxVec3(0.0f, 1.0f, 0.0f), 0.5f, delta, physx::PxControllerFilters());
@@ -925,7 +925,7 @@ Scene::Scene(GLFWwindow* in_window)
 	//printf("\t -----------------------------------------------\n");
 	//printf("\t Scene was initialized in %f seconds \n", double(duration.count() / ( 1000.0f * 1000.0f) ));
 	//printf("\t -----------------------------------------------\n");
-	auto logger = spdlog::basic_logger_mt("scene_logger", "logs/sceneID1.log");
+	auto logger = spdlog::basic_logger_mt("scene_logger", "logs/sceneID2.log");
 	logger->set_level(spdlog::level::info);
 	logger->info("Scene initialized in {:.3f} seconds", double(duration.count() / (1000.0f * 1000.0f)));
 	logger->flush();
@@ -940,9 +940,9 @@ void Scene::Run()
 	//printf("\t -----------------------------------------------\n");
 	//printf("\t PhysX initialized in %f ms \n", double(elapsedTime));
 	//printf("\t -----------------------------------------------\n");
-	auto logger = spdlog::basic_logger_mt("physx_logger", "logs/physxID1.log");
+	auto logger = spdlog::basic_logger_mt("physx_logger", "logs/physxID2.log");
 	logger->set_level(spdlog::level::info);
-	logger->info("PhysX initialized in {:.6f} ms", double(elapsedTime));
+	logger->info("PhysX initialized in {:.6f} seconds", double(elapsedTime / (1000.0 * 1000.0)));
 	logger->flush();
 	startTime = physx::shdfnd::Time::getCurrentCounterValue();
 	Loop();

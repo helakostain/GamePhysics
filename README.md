@@ -26,7 +26,7 @@ Parameter "model_name" is the name of the model, so if we have model named examp
 ## Lightning changes
 Lightning can be changed easily. There is multiple light modes: ambient light, point light, directional light, spotlight. Ambient light is already activated and I recommend to leave it like this. Point light can be added with this methos in Scene.cpp constructor bellow models inicialization ```emplaceLight(const glm::vec3 color, const glm::vec3 pos, const gl::Light type)```.  The light type would be "gl::Light::Point". Directional light has example in the constructor. Spotlight is also already implemented as a flashlight which is activated by key "E" during simulation. 
 ## Game controls
-The game is controlled by keyboard keys WASD and arrow keys for movement similar to many games. Looking through camera is done through mouse, where left button of the mouse needs to be pushed for camera movement. Game is ended with closing the window. 
+The game is controlled by keyboard keys WASD and arrow keys for movement similar to many games. Looking through camera is done through mouse, where left button of the mouse needs to be pushed for camera movement. Character can jump using Space key. Key F is for shooting collisionable balls. Game is ended with closing the window. 
 
 
 
