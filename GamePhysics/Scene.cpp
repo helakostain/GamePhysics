@@ -7,7 +7,7 @@
 
 void Scene::Loop()
 {
-	auto logger = spdlog::basic_logger_mt("performance_logger", "logs/performanceID2.log");
+	auto logger = spdlog::basic_logger_mt("performance_logger", "logs/performanceID1.log");
 	logger->set_level(spdlog::level::info);
 	logger->info("FrameTime;SimTime;ApplyTime");
 
@@ -72,7 +72,7 @@ void Scene::Loop()
 		double applyTime = t4 - t3;
 		//printf("apply time %f\n", applyTime);
 		if (skip > 100)	{
-			logger->info("{:.6f};{:.6f};{:.6f}", frameTime, simTime, applyTime);
+			logger->info("{:.6f};{:.6f};{:.6f}", frameTime*1000, simTime*1000, applyTime*1000);
 		} else {
 			skip++;
 		}
@@ -763,23 +763,23 @@ void Scene::applyPhysXTransform(const float delta, const physx::PxVec3 gravity)
 		collisionFlags = gController->move(controllerState.deltaXP, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 1:
-		forwardDir = physx::PxVec3(camera->view()[2].x, camera->view()[2].y, -camera->view()[2].z); // Extract the forward direction vector from the view matrix
+		forwardDir = physx::PxVec3(camera->view()[2].x, camera->view()[2].y, -camera->view()[2].z)/2; // Extract the forward direction vector from the view matrix
 		movement = forwardDir + controllerState.deltaXP;
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 2:
-		forwardDir = physx::PxVec3(-camera->view()[2].x, camera->view()[2].y, camera->view()[2].z);
+		forwardDir = physx::PxVec3(-camera->view()[2].x, camera->view()[2].y, camera->view()[2].z) / 2;
 		movement = forwardDir + controllerState.deltaXP;
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 3:
 		glm::vec3 cameraLeft = glm::normalize(glm::cross(cameraForward, cameraUp));
-		movement = physx::PxVec3(-cameraLeft.x, cameraLeft.y, -cameraLeft.z) + controllerState.deltaXP; // move one unit sideways to the left
+		movement = physx::PxVec3(-cameraLeft.x, cameraLeft.y, -cameraLeft.z) / 2 + controllerState.deltaXP; // move one unit sideways to the left
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	case 4:
 		glm::vec3 cameraRight = glm::normalize(glm::cross(cameraForward, cameraUp));
-		movement = physx::PxVec3(cameraRight.x, cameraRight.y, cameraRight.z) + controllerState.deltaXP;
+		movement = physx::PxVec3(cameraRight.x, cameraRight.y, cameraRight.z) / 2 + controllerState.deltaXP;
 		collisionFlags = gController->move(movement, 0.01f, delta, physx::PxControllerFilters());
 		break;
 	default:
@@ -925,7 +925,7 @@ Scene::Scene(GLFWwindow* in_window)
 	//printf("\t -----------------------------------------------\n");
 	//printf("\t Scene was initialized in %f seconds \n", double(duration.count() / ( 1000.0f * 1000.0f) ));
 	//printf("\t -----------------------------------------------\n");
-	auto logger = spdlog::basic_logger_mt("scene_logger", "logs/sceneID2.log");
+	auto logger = spdlog::basic_logger_mt("scene_logger", "logs/sceneID1.log");
 	logger->set_level(spdlog::level::info);
 	logger->info("Scene initialized in {:.3f} seconds", double(duration.count() / (1000.0f * 1000.0f)));
 	logger->flush();
@@ -940,7 +940,7 @@ void Scene::Run()
 	//printf("\t -----------------------------------------------\n");
 	//printf("\t PhysX initialized in %f ms \n", double(elapsedTime));
 	//printf("\t -----------------------------------------------\n");
-	auto logger = spdlog::basic_logger_mt("physx_logger", "logs/physxID2.log");
+	auto logger = spdlog::basic_logger_mt("physx_logger", "logs/physxID1.log");
 	logger->set_level(spdlog::level::info);
 	logger->info("PhysX initialized in {:.6f} seconds", double(elapsedTime / (1000.0 * 1000.0)));
 	logger->flush();

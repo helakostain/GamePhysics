@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\Knihovny\glfw-3.3.8.bin.WIN64\include;..\..\Knihovny\glew-2.1.0\include;..\..\Knihovny\glm-master;..\..\Knihovny\soil-master\inc\SOIL;..\..\Knihovny\assimp\include;..\..\Knihovny\freeglut-3.4.0\include;..\..\Knihovny\PhysX-4.1\physx\include;..\..\Knihovny\PhysX-4.1\physx\source\physxextensions\src;..\..\Knihovny\PhysX-4.1\pxshared\include;..\..\Knihovny\PhysX-4.1\physx\source\foundation\include;C:\Users\adamh\OneDrive\Dokumenty\VŠB\bakalářka\Knihovny\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Knihovny\glfw-3.3.8.bin.WIN64\include;..\..\Knihovny\glew-2.1.0\include;..\..\Knihovny\glm-master;..\..\Knihovny\soil-master\inc\SOIL;..\..\Knihovny\assimp\include;..\..\Knihovny\freeglut-3.4.0\include;..\..\Knihovny\PhysX-4.1\physx\include;..\..\Knihovny\PhysX-4.1\physx\source\physxextensions\src;..\..\Knihovny\PhysX-4.1\pxshared\include;..\..\Knihovny\PhysX-4.1\physx\source\foundation\include;..\..\Knihovny\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
